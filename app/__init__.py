@@ -11,30 +11,15 @@ from app.services.translation import t
 from app.utils.menu import get_mega_menu
 from app.routes.orders import orders_bp
 from app.routes.products import products_bp
-
+from config import config_by_name
 
 def create_app(config_name=None):
     app = Flask(__name__, instance_relative_config=True)
 
-    app.config["SECRET_KEY"] = os.environ.get(
-        "SECRET_KEY"
-    )
+    if not config_name:
+        config_name = os.environ.get('FLASK_ENV', 'development')
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-        "DATABASE_URL",
-        "sqlite:///" + os.path.join(app.instance_path, "techshop.db"),
-    )
-
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
-
-    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-    app.config['MAIL_PORT'] = 587
-    app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
-    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
-    # -----------------------------------------
+    app.config.from_object(config_by_name[config_name])
 
     os.makedirs(app.instance_path, exist_ok=True)
 
