@@ -1,0 +1,160 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+<div class="row g-4 mb-4">
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(59,130,246,.12); color: #3b82f6;"><i class="bi bi-box-seam"></i></div>
+      <div class="stat-value" style="color: #3b82f6;">{{ total_products }}</div>
+      <div class="stat-label">Total Products</div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(16,185,129,.12); color: #10b981;"><i class="bi bi-bag-check"></i></div>
+      <div class="stat-value" style="color: #10b981;">{{ total_orders }}</div>
+      <div class="stat-label">Total Orders</div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(245,158,11,.12); color: #f59e0b;"><i class="bi bi-people"></i></div>
+      <div class="stat-value" style="color: #f59e0b;">{{ total_customers }}</div>
+      <div class="stat-label">Customers</div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(239,68,68,.12); color: #ef4444;"><i class="bi bi-currency-dollar"></i></div>
+      <div class="stat-value" style="color: #ef4444;">{{ "%.0f"|format(total_revenue) }}</div>
+      <div class="stat-label">Total Revenue</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(139,92,246,.12); color: #8b5cf6;"><i class="bi bi-grid"></i></div>
+      <div class="stat-value" style="color: #8b5cf6;">{{ total_categories }}</div>
+      <div class="stat-label">Categories</div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(236,72,153,.12); color: #ec4899;"><i class="bi bi-star"></i></div>
+      <div class="stat-value" style="color: #ec4899;">{{ total_reviews }}</div>
+      <div class="stat-label">Reviews</div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(249,115,22,.12); color: #f97316;"><i class="bi bi-exclamation-triangle"></i></div>
+      <div class="stat-value" style="color: #f97316;">{{ low_stock }}</div>
+      <div class="stat-label">Low Stock Items</div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(6,182,212,.12); color: #06b6d4;"><i class="bi bi-ticket-perforated"></i></div>
+      <div class="stat-value" style="color: #06b6d4;">{{ active_coupons }}</div>
+      <div class="stat-label">Active Coupons</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="chart-container">
+      <h5 class="section-title mb-4">Sales (Last 30 Days)</h5>
+      <canvas id="salesChart" height="100"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="chart-container">
+      <h5 class="section-title mb-4">Order Status</h5>
+      <canvas id="statusChart" height="200"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mt-2">
+  <div class="col-lg-6">
+    <div class="admin-table">
+      <div class="d-flex align-items-center justify-content-between p-3" style="border-bottom: 1px solid var(--color-border);">
+        <h5 class="section-title mb-0">Recent Orders</h5>
+        <a href="{{ url_for('admin.admin_orders') }}" class="view-all">View All</a>
+      </div>
+      <table class="table mb-0">
+        <thead><tr><th>Order #</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr>
+            <td><a href="{{ url_for('admin.admin_order_detail', order_id=order.id) }}">#{{ order.id }}</a></td>
+            <td>{{ order.customer_name }}</td>
+            <td>{{ "%.2f"|format(order.total) }}</td>
+            <td><span class="badge-admin" style="background: {% if order.status == 'completed' %}var(--color-success-bg); color: var(--color-success-text);{% elif order.status == 'pending' %}#fef3c7; color: #92400e;{% elif order.status == 'cancelled' %}var(--color-danger-bg); color: var(--color-danger-text);{% else %}#e0e7ff; color: #3730a3;{% endif %}">{{ order.status }}</span></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="text-center text-muted py-4">No orders yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="admin-table">
+      <div class="d-flex align-items-center justify-content-between p-3" style="border-bottom: 1px solid var(--color-border);">
+        <h5 class="section-title mb-0">Low Stock Products</h5>
+        <a href="{{ url_for('admin.admin_products') }}?status=out_of_stock" class="view-all">View All</a>
+      </div>
+      <table class="table mb-0">
+        <thead><tr><th>Product</th><th>Stock</th><th>Price</th></tr></thead>
+        <tbody>
+          {% for p in low_stock_products %}
+          <tr>
+            <td><a href="{{ url_for('admin.admin_product_edit', product_id=p.id) }}">{{ p.name_en }}</a></td>
+            <td><span style="color: {% if p.stock_qty == 0 %}#ef4444{% else %}#f59e0b{% endif %}; font-weight: 700;">{{ p.stock_qty }}</span></td>
+            <td>{{ "%.2f"|format(p.price) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" class="text-center text-muted py-4">All stocked up!</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  new Chart(document.getElementById('salesChart'), {
+    type: 'line',
+    data: {
+      labels: {{ sales_labels|tojson }},
+      datasets: [{
+        label: 'Revenue',
+        data: {{ sales_values|tojson }},
+        borderColor: '#001367',
+        backgroundColor: 'rgba(0,19,103,0.08)',
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: {{ status_labels|tojson }},
+      datasets: [{
+        data: {{ status_values|tojson }},
+        backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ef4444', '#6b7280']
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+  });
+</script>
+{% endblock %}

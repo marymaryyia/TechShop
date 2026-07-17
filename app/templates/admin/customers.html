@@ -1,0 +1,74 @@
+{% extends "admin/base.html" %}
+{% block title %}Customers{% endblock %}
+{% block page_title %}Customers{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin.admin_customers') }}" class="filter-btn {% if not request.args.get('status') %}active{% endif %}">All</a>
+    <a href="{{ url_for('admin.admin_customers', status='active') }}" class="filter-btn {% if request.args.get('status') == 'active' %}active{% endif %}">Active</a>
+    <a href="{{ url_for('admin.admin_customers', status='suspended') }}" class="filter-btn {% if request.args.get('status') == 'suspended' %}active{% endif %}">Suspended</a>
+  </div>
+  <form class="search-admin d-flex gap-2" method="get">
+    <input type="text" name="q" value="{{ request.args.get('q','') }}" class="form-control" placeholder="Search customers..." style="border-radius: 8px;">
+    <button type="submit" class="btn-admin"><i class="bi bi-search"></i></button>
+  </form>
+</div>
+<div class="admin-table">
+  <table class="table mb-0">
+    <thead>
+      <tr><th>Customer</th><th>Email</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for customer in customers %}
+      <tr>
+        <td>
+          <div style="font-weight: 600;">{{ customer.first_name }} {{ customer.last_name }}</div>
+          <div style="font-size: 12px; color: var(--color-text-muted);">Joined {{ customer.created_at.strftime('%Y-%m-%d') if customer.created_at else '-' }}</div>
+        </td>
+        <td>{{ customer.email }}</td>
+        <td>
+          <span class="badge-admin" style="background: {% if customer.is_active %}var(--color-success-bg); color: var(--color-success-text);{% else %}var(--color-danger-bg); color: var(--color-danger-text);{% endif %}">{{ 'Active' if customer.is_active else 'Suspended' }}</span>
+        </td>
+        <td>
+          <a href="{{ url_for('admin.admin_customer_detail', customer_id=customer.id) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px;"><i class="bi bi-eye"></i></a>
+          <form action="{{ url_for('admin.admin_customer_suspend', customer_id=customer.id) }}" method="post" class="d-inline">
+            <button type="submit" class="btn btn-sm {% if customer.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}" style="border-radius: 6px;">
+              <i class="bi {% if customer.is_active %}bi-pause{% else %}bi-play{% endif %}"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="text-center text-muted py-5">No customers found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if pagination.pages > 1 %}
+<nav class="mt-4">
+  <ul class="pagination pagination-admin justify-content-center">
+    {% if pagination.has_prev %}
+    <li class="page-item"><a class="page-link" href="{{ url_for('admin.admin_customers', page=pagination.prev_num, **request.args) }}"><i class="bi bi-chevron-left"></i></a></li>
+    {% else %}
+    <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left"></i></span></li>
+    {% endif %}
+    {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+      {% if p %}
+        {% if p == pagination.page %}
+        <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+        {% else %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('admin.admin_customers', page=p, **request.args) }}">{{ p }}</a></li>
+        {% endif %}
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+      {% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}
+    <li class="page-item"><a class="page-link" href="{{ url_for('admin.admin_customers', page=pagination.next_num, **request.args) }}"><i class="bi bi-chevron-right"></i></a></li>
+    {% else %}
+    <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right"></i></span></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

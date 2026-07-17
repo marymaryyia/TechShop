@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% from "_macros.html" import product_card with context %}
+{% block title %}{{ t('site_name') }} - {{ t('site_tagline') }}{% endblock %}
+{% block content %}
+
+<style>
+  @media (max-width: 767.98px) {
+    .hero-slide .hero-eyebrow,
+    .hero-slide .hero-title,
+    .hero-slide .hero-subtitle {
+      padding-left: 0 !important;
+      text-align: center;
+    }
+    .hero-slide .hero-link {
+      padding-left: 0 !important;
+      justify-content: center;
+      display: flex;
+      width: 100%;
+    }
+    .hero-slide .tbc-logo {
+      margin: 0 auto !important;
+      display: block;
+    }
+    .hero-badge {
+      transform: scale(0.75);
+      top: 10px;
+      right: 0px;
+    }
+  }
+</style>
+
+<section class="hero-section">
+  <div class="container-xl">
+    <div class="row g-3">
+      <div class="col-12">
+        <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel" data-bs-interval="5000">
+          <div class="carousel-indicators">
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3"></button>
+          </div>
+          
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <div class="hero-slide hero-slide-1">
+                <div class="row align-items-center w-100 text-center text-md-start">
+                  <div class="col-12 col-md-6 mt-4 mt-md-0">
+                    <p class="hero-eyebrow">{{ t('hero_slide1_eyebrow') }}</p>
+                    <h1 class="hero-title">{{ t('hero_slide1_title') }}<br /><span>{{ t('hero_slide1_title_span') }}</span></h1>
+                    <p class="hero-subtitle">{{ t('hero_slide1_subtitle') }}</p>
+                    <img src="/static/images/Tbc-logo-ka_GE.svg.png" class="tbc-logo mx-auto mx-md-0" alt="TBC"/>
+                    <a href="{{ url_for('products.products', category='laptops', brand='Apple') }}" class="hero-link hero-link-macbook">
+  {{ t('hero_buy_btn') }} <i class="bi bi-arrow-right"></i>
+</a>
+                  </div>
+                  <div class="col-12 col-md-6 text-center position-relative mt-4 mt-md-0">
+                    <img src="/static/images/macbook.png" class="hero-product-img img-fluid" alt="MacBook Pro" style="max-width: 100%; height: auto;" />
+                    
+                    <div class="hero-badge position-absolute" style="top: 40px; right: 120px;">
+                      <span class="discount">-10%</span>
+                      <span class="off">{{ t('hero_discount_label') }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="hero-caption">{{ t('hero_slide1_caption') }}</div>
+              </div>
+            </div>
+
+            <div class="carousel-item">
+              <div class="hero-slide hero-slide-2">
+                <div class="row align-items-center w-100 text-center text-md-start">
+                  <div class="col-12 col-md-7 mt-4 mt-md-0">
+                    <p class="hero-eyebrow">{{ t('hero_slide2_eyebrow') }}</p>
+                    <h1 class="hero-title">{{ t('hero_slide2_title') }}<br /><span>{{ t('hero_slide2_title_span') }} <img src="/static/images/tradein.png" class="trade-logo" /></span></h1>
+                    <p class="hero-subtitle">{{ t('hero_slide2_subtitle') }}</p>
+                    <a href="{{ url_for('products.products', category='mobile-phones', brand='Samsung') }}" class="hero-link hero-link-s26">
+  {{ t('hero_buy_btn') }} <i class="bi bi-arrow-right"></i>
+</a>
+                  </div>
+                  <div class="col-12 col-md-5 text-center position-relative mt-4 mt-md-0">
+                    <img src="/static/images/galaxys26.png" class="hero-product-img img-fluid" alt="Samsung Galaxy" style="max-width: 100%; height: auto;"/>
+                    
+                    <div class="hero-badge position-absolute" style="top: -10px; right: 100px;">
+                      <span class="discount">-15%</span>
+                      <span class="off">{{ t('hero_discount_label') }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="hero-caption">{{ t('hero_slide2_caption') }}</div>
+              </div>
+            </div>
+
+           <div class="carousel-item">
+  <div class="hero-slide hero-slide-3">
+    <div class="row align-items-center w-100 text-center text-md-start">
+      <div class="col-12 col-md-7 mt-4 mt-md-0">
+        <p class="hero-eyebrow">{{ t('hero_slide3_eyebrow') }}</p>
+        <h1 class="hero-title">{{ t('hero_slide3_title') }}<br /><span>{{ t('hero_slide3_title_span') }}</span></h1>
+        <p class="hero-subtitle">{{ t('hero_slide3_subtitle') }}</p>
+        <img src="/static/images/Tbc-logo-ka_GE.svg.png" class="tbc-logo mx-auto mx-md-0" alt="TBC" />
+        <a href="{{ url_for('products.products', category='gaming', subcategory='consoles') }}" class="hero-link" style="padding-left: 200px;">
+  {{ t('hero_buy_btn') }} <i class="bi bi-arrow-right"></i>
+</a>
+      </div>
+      <div class="col-12 col-md-5 text-center position-relative mt-4 mt-md-0">
+        <img src="/static/images/playstation.png" class="hero-product-img img-fluid" alt="PS5" style="max-width: 100%; height: auto;"/>
+        
+        <div class="hero-badge position-absolute" style="top: 10px; right: 20%;">
+          <span class="discount fs-4">-400₾</span>
+          <span class="off">{{ t('hero_discount_label') }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-caption">{{ t('hero_slide3_caption') }}</div>
+  </div>
+</div>
+             <div class="carousel-item">
+  <div class="hero-slide hero-slide-4">
+    <div class="row align-items-center w-100 text-center text-md-start">
+      <div class="col-12 col-md-7 mt-4 mt-md-0">
+        <p class="hero-eyebrow">{{ t('hero_slide4_eyebrow') }}</p>
+        <h1 class="hero-title">{{ t('hero_slide4_title') }}<br /><span>{{ t('hero_slide4_title_span') }}</span></h1>
+        <p class="hero-subtitle">{{ t('hero_slide4_subtitle') }}</p>
+        <img src="/static/images/Tbc-logo-ka_GE.svg.png" class="tbc-logo mx-auto mx-md-0" alt="TBC" />
+        <a href="{{ url_for('products.products', category='mobile-phones', brand='Apple') }}" class="hero-link" style="padding-left: 110px;">
+  {{ t('hero_buy_btn') }} <i class="bi bi-arrow-right"></i>
+</a>
+      </div>
+      <div class="col-12 col-md-5 text-center position-relative mt-4 mt-md-0">
+        <img src="/static/images/iphone17.png" class="hero-product-img img-fluid" alt="iphone17" style="max-width: 100%; height: auto; padding-bottom: 20px;"/>
+        
+        <div class="hero-badge position-absolute" style="top: 10px; right: 35%;">
+          <span class="discount fs-4">3849₾</span>
+          <span class="off text-decoration-line-through text-dark fs-5">4049₾</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-caption">{{ t('hero_slide4_caption') }}</div>
+  </div>
+</div>
+
+          </div>
+          
+          <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <i class="bi bi-chevron-left fs-2 text-dark"></i>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <i class="bi bi-chevron-right fs-2 text-dark"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- categories -->
+<section class="section-pad bg-white-section">
+  <div class="container-xl">
+    <div class="section-header">
+      <h2 class="section-title">{{ t('shop_by_category') }}</h2>
+      <a href="{{ url_for('products.products') }}" class="view-all">{{ t('view_all') }} <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="category-scroll">
+      {% for cat in categories %}
+      <a href="{{ url_for('products.products', category=cat.slug) }}" class="cat-card">
+        <i class="bi {{ cat.icon_class }} cat-icon"></i>
+        <span class="cat-name">{{ cat.name[lang] }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- featured products -->
+<section class="section-pad">
+  <div class="container-xl">
+    <div class="section-header">
+      <h2 class="section-title">{{ t('featured_products') }}</h2>
+      <a href="{{ url_for('products.products') }}" class="view-all">{{ t('view_all') }} <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="row g-3">
+      {% for p in featured %}
+      <div class="col-6 col-md-4 col-lg-3">
+        {{ product_card(p) }}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- brands -->
+<section class="bg-white-section section-pad" id="brands">
+  <div class="container-xl position-relative px-4 px-md-5">
+    <div class="section-header border-0">
+      <h2 class="section-title">{{ t('top_brands') }}</h2>
+    </div>
+
+    <div id="brandsCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+      <div class="carousel-inner pb-3">
+        
+        {% for brand_group in top_brands[:36]|batch(6) %}
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+          <div class="row justify-content-center g-2 g-md-3">
+            {% for brand in brand_group %}
+            <div class="col-4 col-md-3 col-lg-2">
+              <a href="{{ url_for('products.products', brand=brand) }}" class="brand-card">
+                <img src="{{ url_for('static', filename='images/brands/' ~ brand|lower|replace(' ', '-') ~ '.png') }}" 
+                     alt="{{ brand }}" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <span class="brand-text-fallback" style="display: none;">{{ brand }}</span>
+              </a>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+
+      </div>
+      
+      <button class="carousel-control-prev btn-brand-nav" type="button" data-bs-target="#brandsCarousel" data-bs-slide="prev">
+        <i class="bi bi-chevron-left text-dark"></i>
+      </button>
+      <button class="carousel-control-next btn-brand-nav" type="button" data-bs-target="#brandsCarousel" data-bs-slide="next">
+        <i class="bi bi-chevron-right text-dark"></i>
+      </button>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

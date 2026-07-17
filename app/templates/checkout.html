@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}{{ t('checkout_details') }} - {{ t('site_name') }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.checkout-page { padding: 40px 0 80px; background-color: #fcfcfc; }
+.btn-back { color: var(--color-text); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 15px; transition: 0.2s; }
+.btn-back:hover { color: var(--color-navy); }
+.address-radio-card input[type="radio"] { display: none; }
+.address-radio-card .card-content { border: 2px solid var(--color-border); border-radius: 12px; padding: 16px 20px; cursor: pointer; transition: 0.2s; background: #fff; }
+.address-radio-card input[type="radio"]:checked + .card-content { border-color: var(--color-navy); background-color: var(--color-surface-soft); }
+.address-radio-card .radio-indicator { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #d1d5db; position: relative; transition: 0.2s; }
+.address-radio-card input[type="radio"]:checked + .card-content .radio-indicator { border-color: var(--color-navy); }
+.address-radio-card input[type="radio"]:checked + .card-content .radio-indicator::after { content: ""; position: absolute; top: 4px; left: 4px; width: 10px; height: 10px; background-color: var(--color-navy); border-radius: 50%; }
+.checkout-input-wrap { position: relative; margin-bottom: 16px; }
+.checkout-input-wrap input { width: 100%; background-color: #f3f4f6; border: 1px solid transparent; border-radius: 12px; padding: 24px 16px 8px; font-size: 15px; font-weight: 600; color: var(--color-text); outline: none; transition: 0.2s; }
+.checkout-input-wrap input:focus { background-color: #fff; border-color: var(--color-navy); box-shadow: 0 0 0 4px rgba(0, 0, 50, 0.05); }
+.checkout-input-wrap label { position: absolute; top: 8px; left: 16px; font-size: 11px; color: #6b7280; font-weight: 500; pointer-events: none; }
+.summary-card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); position: sticky; top: 90px; }
+.summary-row { display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 15px; color: var(--color-text-muted); font-weight: 600; }
+.summary-total { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--color-border); }
+.btn-checkout-primary { background-color: var(--color-navy); color: #fff; width: 100%; padding: 16px; border-radius: 12px; border: none; font-size: 16px; font-weight: 700; margin-top: 24px; transition: 0.2s; }
+.btn-checkout-primary:hover { background-color: var(--color-navy-hover); }
+.promo-wrap input { background: #f3f4f6; border: none; border-radius: 12px; padding: 14px 16px; font-weight: 600; font-size: 14px; outline: none; }
+.promo-wrap button { background: #e5e7eb; color: var(--color-text); border: none; border-radius: 12px; padding: 0 20px; font-weight: 700; font-size: 14px; transition: 0.2s; cursor: pointer; }
+.promo-wrap button:hover { background: #d1d5db; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="checkout-page">
+  <div class="container-xl" style="max-width: 1100px;">
+    
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <a href="{{ url_for('cart.cart') }}" class="btn-back">
+            <i class="bi bi-chevron-left"></i> {{ t('go_back') }}
+        </a>
+        <h3 class="m-0 fw-bold">{{ t('checkout_details') }}</h3>
+        <div style="width: 100px;"></div> 
+    </div>
+    
+    <form action="{{ url_for('cart.confirm_checkout') }}" method="POST" id="checkoutForm">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      
+      <div class="row g-5">
+        
+        <div class="col-lg-7">
+          
+          <div class="mb-5">
+            <h5 class="fw-bold mb-4">{{ t('choose_address') }}</h5>
+            
+            {% if current_user.addresses.count() > 0 %}
+                {% for addr in current_user.addresses %}
+                <label class="address-radio-card w-100 mb-3">
+                    <input type="radio" name="address_id" value="{{ addr.id }}" {% if loop.first %}checked{% endif %}>
+                    <div class="card-content d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="fw-bold mb-1" style="color: var(--color-navy);">{{ addr.label }}</h6>
+                            <span class="text-muted" style="font-size: 14px;">{{ addr.city }}, {{ addr.address_line1 }}</span>
+                        </div>
+                        <div class="radio-indicator"></div>
+                    </div>
+                </label>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-light text-center" style="border-radius: 12px; border: 1px dashed var(--color-border);">
+                    {{ t('no_addresses') }}
+                </div>
+            {% endif %}
+
+            <a href="{{ url_for('profile.profile') }}#addresses" class="btn btn-link text-decoration-none fw-bold mt-2 p-0" style="color: var(--color-navy);">
+                <i class="bi bi-plus-circle-fill me-2"></i> {{ t('add_new_address') }}
+            </a>
+          </div>
+
+          <div>
+            <h5 class="fw-bold mb-4">{{ t('receiver_info') }}</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="checkout-input-wrap">
+                    <label>{{ t('first_name') }}</label>
+                    <input type="text" name="first_name" value="{{ current_user.first_name }}" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="checkout-input-wrap">
+                    <label>{{ t('last_name') }}</label>
+                    <input type="text" name="last_name" value="{{ current_user.last_name }}" required>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="checkout-input-wrap">
+                    <label>{{ t('phone') }}</label>
+                    <input type="text" name="phone" value="{{ current_user.phone or '' }}" required>
+                </div>
+              </div>
+              <input type="hidden" name="email" value="{{ current_user.email }}">
+            </div>
+          </div>
+          
+        </div>
+
+        <div class="col-lg-5">
+          <div class="summary-card">
+            
+            <div class="summary-row">
+                <span>{{ t('subtotal') }}</span>
+                <span class="text-dark">{{ "%.2f"|format(subtotal + discount_amount) }} ₾</span>
+            </div>
+            
+            <div class="summary-row" id="discountRow" style="{% if discount_amount == 0 %}display: none;{% endif %} color: green;">
+                <span>{{ t('discount') }}</span>
+                <span id="discountVal">-{{ "%.2f"|format(discount_amount) }} ₾</span>
+            </div>
+            
+            <div class="summary-row">
+                <span>{{ t('shipping_cost') }}</span>
+                <span class="text-dark">{{ t('free') }} (0 ₾)</span>
+            </div>
+
+            <div class="summary-total">
+                <span class="text-muted fw-bold">{{ t('total_to_pay') }}</span>
+                <span id="totalPrice" class="fw-bold" style="color: var(--color-navy); font-size: 22px;">{{ "%.2f"|format(final_total) }} ₾</span>
+            </div>
+
+            <button type="submit" class="btn-checkout-primary">{{ t('confirm_order') }}</button>
+
+            <div class="promo-wrap d-flex gap-2 mt-4">
+                <input type="text" id="promoInput" name="promo_code" value="{{ session.get('applied_promo', '') }}" class="w-100" placeholder="{{ t('enter_promo') }}">
+                <button type="button" id="applyPromoBtn" onclick="runPromoCodeCheck()">{{ t('apply_promo') }}</button>
+            </div>
+            <div id="promoMessage" class="mt-2 text-center" style="font-size: 13px; font-weight: 600;"></div>
+
+          </div>
+        </div>
+        
+      </div>
+    </form>
+  </div>
+</section>
+
+<script>
+async function runPromoCodeCheck() {
+    const promoInput = document.getElementById('promoInput');
+    const messageEl = document.getElementById('promoMessage');
+    const tokenInput = document.querySelector('input[name="csrf_token"]');
+
+    const promoCode = promoInput ? promoInput.value.trim() : '';
+    const csrfToken = tokenInput ? tokenInput.value : '';
+
+    if (!promoCode) {
+        messageEl.textContent = "გთხოვთ შეიყვანოთ პრომოკოდი";
+        messageEl.style.color = "red";
+        return;
+    }
+
+    messageEl.textContent = "მოწმდება...";
+    messageEl.style.color = "gray";
+
+    try {
+        const response = await fetch("{{ url_for('cart.apply_promo') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({ code: promoCode })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            messageEl.textContent = data.message;
+            messageEl.style.color = "green";
+            
+            document.getElementById('discountRow').style.display = 'flex';
+            document.getElementById('discountVal').textContent = "-" + data.discount_amount + " ₾";
+            document.getElementById('totalPrice').textContent = data.new_total + " ₾";
+        } else {
+            messageEl.textContent = data.message || "კოდი არასწორია";
+            messageEl.style.color = "red";
+        }
+    } catch (error) {
+        alert("დაფიქსირდა სერვერის შეცდომა! გთხოვთ შეამოწმოთ ბრაუზერის F12 კონსოლი.");
+        messageEl.textContent = "შეცდომა კავშირის დროს!";
+        messageEl.style.color = "red";
+        console.error(error);
+    }
+}
+</script>
+{% endblock %}

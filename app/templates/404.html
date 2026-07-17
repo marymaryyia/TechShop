@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}404 - {{ t('site_name') }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.error-page {
+    padding: 100px 0;
+    background-color: #fcfcfc;
+    min-height: 65vh;
+    display: flex;
+    align-items: center;
+}
+.error-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 60px 40px;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.03);
+    max-width: 550px;
+    margin: 0 auto;
+}
+.error-title {
+    font-size: 110px;
+    font-weight: 800;
+    color: var(--color-navy);
+    line-height: 1;
+    margin-bottom: 16px;
+    text-shadow: 4px 4px 0px rgba(0, 0, 50, 0.05); 
+}
+.error-subtitle {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--color-text);
+    margin-bottom: 12px;
+}
+.error-desc {
+    font-size: 15px;
+    color: #6b7280;
+    font-weight: 500;
+    margin-bottom: 32px;
+    line-height: 1.6;
+}
+.btn-error-home {
+    background-color: var(--color-navy);
+    color: #fff;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+.btn-error-home:hover { 
+    background-color: var(--color-navy-hover, #000040); 
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 50, 0.1);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="error-page">
+  <div class="container-xl text-center">
+    
+    <div class="error-card">
+        <h1 class="error-title">404</h1>
+        <h2 class="error-subtitle">{{ t('page_not_found') }}</h2>
+        <p class="error-desc">
+            სამწუხაროდ, გვერდი რომელსაც ეძებთ არ არსებობს, წაიშალა ან დროებით მიუწვდომელია.
+        </p>
+        
+        <a href="{{ url_for('main.index') }}" class="btn-error-home">
+            <i class="bi bi-house-door-fill"></i> {{ t('back_to_home') }}
+        </a>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

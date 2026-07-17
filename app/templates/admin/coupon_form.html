@@ -1,0 +1,57 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if coupon else 'New' }} Coupon{% endblock %}
+{% block page_title %}{{ 'Edit' if coupon else 'New' }} Coupon{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="stat-card">
+      <form method="post" class="form-admin">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="mb-3">
+          <label>Coupon Code</label>
+          <input type="text" name="code" value="{{ coupon.code if coupon else '' }}" class="form-control" style="text-transform: uppercase;" required>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label>Type</label>
+            <select name="type" class="form-control" required>
+              <option value="percentage" {% if coupon and coupon.type == 'percentage' %}selected{% endif %}>Percentage (%)</option>
+              <option value="fixed" {% if coupon and coupon.type == 'fixed' %}selected{% endif %}>Fixed Amount</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Discount Value</label>
+            <input type="number" step="0.01" name="value" value="{{ coupon.value if coupon else '' }}" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label>Max Uses (Optional)</label>
+            <input type="number" name="max_uses" value="{{ coupon.max_uses if coupon else '' }}" class="form-control">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Min Order Amount (Optional)</label>
+            <input type="number" step="0.01" name="min_order" value="{{ coupon.min_order if coupon else '0' }}" class="form-control">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label>Expiration Date (Optional)</label>
+          <input type="date" name="expires_at" value="{{ coupon.expires_at.strftime('%Y-%m-%d') if coupon and coupon.expires_at else '' }}" class="form-control">
+        </div>
+
+        <div class="mb-4 form-check form-switch">
+          <input type="checkbox" name="is_active" class="form-check-input" id="isActive" {% if not coupon or coupon.is_active %}checked{% endif %}>
+          <label class="form-check-label" for="isActive">Coupon is active</label>
+        </div>
+
+        <button type="submit" class="btn-admin">Save Coupon</button>
+        <a href="{{ url_for('admin.admin_coupons') }}" class="btn-admin-outline ms-2">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

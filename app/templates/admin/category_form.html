@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if category else 'New' }} Category{% endblock %}
+{% block page_title %}{{ 'Edit' if category else 'New' }} Category{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="stat-card">
+      <form method="post" class="form-admin">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="mb-3">
+          <label>Name (KA)</label>
+          <input type="text" name="name_ka" value="{{ category.name_ka if category else '' }}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label>Name (EN)</label>
+          <input type="text" name="name_en" value="{{ category.name_en if category else '' }}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label>Slug</label>
+          <input type="text" name="slug" value="{{ category.slug if category else '' }}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label>Icon Class</label>
+          <input type="text" name="icon_class" value="{{ category.icon_class if category else 'bi-laptop' }}" class="form-control">
+        </div>
+        <div class="mb-3">
+          <label>Sort Order</label>
+          <input type="number" name="sort_order" value="{{ category.sort_order if category else 0 }}" class="form-control">
+        </div>
+        <button type="submit" class="btn-admin">Save Category</button>
+        <a href="{{ url_for('admin.admin_categories') }}" class="btn-admin-outline ms-2">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

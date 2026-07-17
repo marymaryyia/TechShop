@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if item else 'New' }} Mega Item{% endblock %}
+{% block page_title %}{{ 'Edit' if item else 'New' }} Mega Item{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="stat-card">
+      <form method="post" class="form-admin">
+        <div class="mb-3">
+          <label>Mega Group</label>
+          <select name="group_id" class="form-select" required>
+            <option value="">Select Group</option>
+            {% for g in groups %}
+            <option value="{{ g.id }}" {% if item and item.group_id == g.id %}selected{% endif %}>
+              {{ g.title_en }} ({{ g.category.name_en if g.category else 'No Cat' }})
+            </option>
+            {% endfor %}
+          </select>
+          <div class="form-text" style="font-size: 12px; color: var(--color-text-muted);">
+            Select which column this item belongs to. You can move items between groups.
+          </div>
+        </div>
+        <div class="mb-3">
+          <label>Name (KA)</label>
+          <input type="text" name="name_ka" value="{{ item.name_ka if item else '' }}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label>Name (EN)</label>
+          <input type="text" name="name_en" value="{{ item.name_en if item else '' }}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label>URL</label>
+          <input type="text" name="url" value="{{ item.url if item else '' }}" class="form-control" required placeholder="/products?category=...">
+          <div class="form-text" style="font-size: 12px; color: var(--color-text-muted);">
+            Example: /products?category=mobile-phones&brand=Apple
+          </div>
+        </div>
+        <div class="mb-3">
+          <label>Sort Order</label>
+          <input type="number" name="sort_order" value="{{ item.sort_order if item else 0 }}" class="form-control">
+          <div class="form-text" style="font-size: 12px; color: var(--color-text-muted);">Lower numbers appear first within the group.</div>
+        </div>
+        <button type="submit" class="btn-admin">Save Mega Item</button>
+        <a href="{{ url_for('admin.admin_mega_items') }}" class="btn-admin-outline ms-2">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "admin/base.html" %}
+{% block title %}Mega Items{% endblock %}
+{% block page_title %}Mega Items{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div class="d-flex gap-2 flex-wrap align-items-center">
+    <a href="{{ url_for('admin.admin_mega_item_create') }}" class="btn-admin"><i class="bi bi-plus-lg me-1"></i> Add Mega Item</a>
+    <a href="{{ url_for('admin.admin_mega_groups') }}" class="btn-admin-outline"><i class="bi bi-layout-three-columns me-1"></i> Manage Groups</a>
+  </div>
+  <form class="search-admin d-flex gap-2" method="get">
+    <select name="group" class="form-select" style="border-radius: 8px; min-width: 220px;" onchange="this.form.submit()">
+      <option value="">All Groups</option>
+      {% for g in groups %}
+      <option value="{{ g.id }}" {% if selected_group == g.id %}selected{% endif %}>{{ g.title_en }} ({{ g.category.name_en if g.category else 'No Cat' }})</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+<div class="admin-table">
+  <table class="table mb-0">
+    <thead>
+      <tr><th>Name (EN)</th><th>Name (KA)</th><th>Group</th><th>Category</th><th>URL</th><th>Sort</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td style="font-weight: 600;">{{ item.name_en }}</td>
+        <td style="font-size: 12px; color: var(--color-text-muted);">{{ item.name_ka }}</td>
+        <td>{{ item.group.title_en if item.group else '-' }}</td>
+        <td>
+          {% if item.group and item.group.category %}
+          <span class="badge-admin" style="background: var(--color-navy-bg); color: var(--color-navy);">{{ item.group.category.name_en }}</span>
+          {% else %}-{% endif %}
+        </td>
+        <td><code style="font-size: 11px;">{{ item.url }}</code></td>
+        <td>{{ item.sort_order }}</td>
+        <td>
+          <a href="{{ url_for('admin.admin_mega_item_edit', item_id=item.id) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px;"><i class="bi bi-pencil"></i></a>
+          <form action="{{ url_for('admin.admin_mega_item_delete', item_id=item.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this MegaItem?');">
+            <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius: 6px;"><i class="bi bi-trash"></i></button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="text-center text-muted py-5">No mega items found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

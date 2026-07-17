@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block title %}{{ t('register') }} - {{ t('site_name') }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-bg) 100%);
+  padding: 40px 20px;
+}
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow: 0 20px 60px var(--color-shadow-strong);
+  position: relative;
+  overflow: hidden;
+}
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-navy), var(--color-orange));
+}
+.auth-heading {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text);
+  text-align: center;
+  margin-bottom: 6px;
+}
+.auth-subheading {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-bottom: 28px;
+}
+.floating-group {
+  position: relative;
+  margin-bottom: 16px;
+}
+.floating-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all .2s ease;
+  outline: none;
+}
+.floating-input:focus {
+  border-color: var(--color-navy);
+  box-shadow: 0 0 0 3px rgba(0,19,103,.08);
+}
+.floating-label {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--color-surface);
+  padding: 0 5px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;
+  transition: all .2s ease;
+}
+.floating-input:focus + .floating-label,
+.floating-input:not(:placeholder-shown) + .floating-label,
+.floating-input:-webkit-autofill + .floating-label {
+  top: 0;
+  font-size: 11px;
+  color: var(--color-navy);
+  font-weight: 600;
+}
+.btn-auth {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-navy);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s ease;
+  margin-top: 4px;
+}
+.btn-auth:hover {
+  background: var(--color-navy-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,19,103,.25);
+}
+.auth-footer {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+.auth-footer a {
+  color: var(--color-navy);
+  font-weight: 700;
+  text-decoration: none;
+}
+.auth-footer a:hover { text-decoration: underline; }
+.auth-alert {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.auth-alert.error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  border: 1px solid rgba(220,38,38,.15);
+}
+.name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.code-input {
+  text-align: center;
+  font-size: 20px;
+  letter-spacing: 4px;
+  font-weight: 800;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+    
+    {% if error %}
+    <div class="auth-alert error">
+      <i class="bi bi-exclamation-circle-fill"></i>
+      <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    {% if show_verify_step %}
+    <h1 class="auth-heading">ვერიფიკაცია</h1>
+    <p class="auth-subheading">კოდი გაგზავნილია მეილზე: <br><strong>{{ email }}</strong></p>
+
+    <form action="{{ url_for('auth.register') }}" method="post" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <input type="hidden" name="step" value="verify"/>
+      <input type="hidden" name="email" value="{{ email }}"/>
+
+      <div class="floating-group">
+        <input type="text" name="code" id="verifyCode" class="floating-input code-input" placeholder=" " maxlength="6" required>
+        <label for="verifyCode" class="floating-label">6-ნიშნა კოდი</label>
+      </div>
+
+      <button type="submit" class="btn-auth">
+        <i class="bi bi-check-circle me-2"></i>დადასტურება
+      </button>
+    </form>
+    
+    {% else %}
+    <h1 class="auth-heading">{{ t('create_account') }}</h1>
+    <p class="auth-subheading">{{ t('register_subtitle') }}</p>
+
+    <form action="{{ url_for('auth.register') }}" method="post" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <input type="hidden" name="step" value="register"/>
+
+      <div class="name-row">
+        <div class="floating-group">
+          <input type="text" name="first_name" id="regFirstName" class="floating-input" placeholder=" " required>
+          <label for="regFirstName" class="floating-label">{{ t('first_name') }}</label>
+        </div>
+        <div class="floating-group">
+          <input type="text" name="last_name" id="regLastName" class="floating-input" placeholder=" " required>
+          <label for="regLastName" class="floating-label">{{ t('last_name') }}</label>
+        </div>
+      </div>
+      
+      <div class="floating-group">
+        <input type="email" name="email" id="regEmail" class="floating-input" placeholder=" " required>
+        <label for="regEmail" class="floating-label">{{ t('email') }}</label>
+      </div>
+      
+      <div class="floating-group">
+        <input type="password" name="password" id="regPassword" class="floating-input" placeholder=" " required minlength="6">
+        <label for="regPassword" class="floating-label">{{ t('password') }}</label>
+      </div>
+      
+      <div class="floating-group">
+        <input type="password" name="password2" id="regPassword2" class="floating-input" placeholder=" " required>
+        <label for="regPassword2" class="floating-label">{{ t('confirm_password') }}</label>
+      </div>
+      
+      <button type="submit" class="btn-auth">
+        <i class="bi bi-person-plus me-2"></i>{{ t('register_button') }}
+      </button>
+    </form>
+    {% endif %}
+
+    <div class="auth-footer">
+      {{ t('have_account') }} <a href="{{ url_for('auth.login') }}">{{ t('login_here') }}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

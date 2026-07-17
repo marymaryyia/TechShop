@@ -1,0 +1,131 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit Product' if product else 'Create Product' }}{% endblock %}
+{% block page_title %}{{ 'Edit Product' if product else 'Create Product' }}{% endblock %}
+{% block content %}
+<form action="" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="row">
+    
+    <div class="col-lg-8">
+      <div class="admin-card mb-4">
+        <h4 class="mb-4" style="font-weight: 700; color: #111827;">Product Information</h4>
+        
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Name (KA)</label>
+            <input type="text" name="name_ka" class="form-control" value="{{ product.name_ka if product else '' }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Name (EN)</label>
+            <input type="text" name="name_en" class="form-control" value="{{ product.name_en if product else '' }}" required>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label text-muted small">Category</label>
+            <select name="category_id" class="form-control" required>
+                <option value="">Select Category</option>
+                {% for c in categories %}
+                <option value="{{ c.id }}" {% if product and product.category_id == c.id %}selected{% endif %}>{{ c.name_en }}</option>
+                {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted small">Subcategory</label>
+            <select name="subcategory_id" class="form-control">
+                <option value="">Select Subcategory</option>
+                {% for sc in subcategories %}
+                <option value="{{ sc.id }}" {% if product and product.subcategory_id == sc.id %}selected{% endif %}>{{ sc.name_en }}</option>
+                {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted small">Brand</label>
+            <select name="brand_id" class="form-control">
+                <option value="">Select Brand</option>
+                {% for b in brands %}
+                <option value="{{ b.id }}" {% if product and product.brand_id == b.id %}selected{% endif %}>{{ b.name }}</option>
+                {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label text-muted small">Price</label>
+            <input type="number" step="0.01" name="price" class="form-control" value="{{ product.price if product else '' }}" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted small">Old Price</label>
+            <input type="number" step="0.01" name="old_price" class="form-control" value="{{ product.old_price if product and product.old_price else '' }}">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted small">Stock Qty</label>
+            <input type="number" name="stock_qty" class="form-control" value="{{ product.stock_qty if product else '0' }}">
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label text-muted small">SKU</label>
+            <input type="text" name="sku" class="form-control" value="{{ product.sku if product else '' }}">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted small">Badge</label>
+            <input type="text" name="badge" class="form-control" value="{{ product.badge if product else '' }}">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted small">Slug</label>
+            <input type="text" name="slug" class="form-control" value="{{ product.slug if product else '' }}" required>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted small">Description (KA)</label>
+          <textarea name="description_ka" class="form-control" rows="3">{{ product.description_ka if product else '' }}</textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted small">Description (EN)</label>
+          <textarea name="description_en" class="form-control" rows="3">{{ product.description_en if product else '' }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      
+      <div class="admin-card mb-4">
+        <h4 class="mb-4" style="font-weight: 700; color: #111827;">Image</h4>
+        <div class="mb-3 text-center">
+          {% if product and product.image %}
+              {% if product.image.startswith('http') or product.image.startswith('//') %}
+                  <img src="{{ product.image }}" alt="Current Image" style="max-width: 100%; border-radius: 8px;">
+              {% else %}
+                  <img src="{{ url_for('static', filename=product.image) }}" alt="Current Image" style="max-width: 100%; border-radius: 8px;">
+              {% endif %}
+          {% else %}
+              <div class="text-muted p-4 border border-dashed rounded bg-light">No image uploaded</div>
+          {% endif %}
+        </div>
+        <input type="file" name="image" class="form-control">
+      </div>
+
+      <div class="admin-card">
+        <h4 class="mb-4" style="font-weight: 700; color: #111827;">Settings</h4>
+        
+        <div class="form-check mb-4">
+          <input class="form-check-input" type="checkbox" name="is_active" id="isActive" {% if product is none or product.is_active %}checked{% endif %}>
+          <label class="form-check-label" for="isActive">
+            Active
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-admin w-100 mb-2">Save Product</button>
+        <a href="{{ url_for('admin.admin_products') }}" class="btn btn-outline-secondary w-100" style="border-radius: 6px;">Cancel</a>
+      </div>
+
+    </div>
+  </div>
+</form>
+{% endblock %}

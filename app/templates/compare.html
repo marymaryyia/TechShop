@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}{{ t('your_compare') }} - {{ t('site_name') }}{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    {% if message == "compare_category_mismatch" %}
+      <div class="modal fade show d-block" id="compareErrorModal" tabindex="-1" style="background: rgba(0, 12, 63, 0.4); backdrop-filter: blur(4px); z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 py-3 rounded-top-4 d-flex justify-content-between align-items-center" style="background-color: var(--color-surface-soft);">
+              <h5 class="modal-title d-flex align-items-center gap-2 fw-bold" style="color: var(--color-navy); font-size: 1.1rem; font-family: 'Inter', sans-serif;">
+                <i class="bi bi-exclamation-circle-fill text-danger"></i> {{ t('attention') }}
+              </h5>
+              <button type="button" class="btn-close" style="font-size: 0.85rem;" onclick="document.getElementById('compareErrorModal').remove();"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+              <p class="fs-6 mb-0 fw-medium" style="color: var(--color-text); font-family: 'Inter', sans-serif; line-height: 1.6;">
+                {{ t('compare_category_mismatch') }}
+              </p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center pb-4">
+              <button type="button" class="btn text-white px-5 rounded-3 fw-bold py-2 shadow-sm" 
+                      style="background-color: var(--color-navy); border: none; font-size: 0.9rem;"
+                      onclick="document.getElementById('compareErrorModal').remove();">
+                {{ t('understand') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endwith %}
+
+<section class="py-5 bg-light min-vh-100">
+  <div class="container-xl bg-white p-0 rounded-4 shadow-sm overflow-hidden border">
+    <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
+      <h3 class="mb-0 fw-bold text-dark" style="font-family: 'Inter', sans-serif;">{{ t('your_compare') }}</h3>
+      {% if products %}
+      <form action="{{ url_for('compare.compare_clear') }}" method="POST" class="m-0">
+         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+         <button type="submit" class="btn btn-link text-secondary text-decoration-none p-0 d-flex align-items-center gap-2 small fw-semibold">
+           <i class="bi bi-trash3 fs-6"></i> {{ t('clear_all') }}
+         </button>
+      </form>
+      {% endif %}
+    </div>
+
+    {% if products %}
+      <div class="table-responsive">
+        <table class="table align-middle m-0" style="table-layout: fixed; min-width: 950px;">
+          <thead>
+            <tr class="bg-light">
+              <th class="p-4 border-0 align-middle bg-white" style="width: 22%;">
+                <div class="fw-bold text-secondary text-uppercase small tracking-wider">
+                  {{ t('features') }}
+                </div>
+              </th>
+              
+              {% for p in products %}
+              <th class="p-3 text-center position-relative border-start border-bottom-0 bg-white" style="width: 19.5%;">
+                <form action="{{ url_for('compare.compare_toggle', product_id=p.id) }}" method="post" class="position-absolute top-0 end-0 mt-2 me-2">
+                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                   <input type="hidden" name="next" value="{{ url_for('compare.compare') }}">
+                   <button type="submit" class="btn btn-sm btn-light rounded-circle text-muted p-1 border" style="width: 28px; height: 28px; line-height: 1;">
+                     <i class="bi bi-x-lg" style="font-size: 0.75rem;"></i>
+                   </button>
+                </form>
+                <div class="d-flex align-items-center justify-content-center mb-3 p-2 border rounded-3 bg-white" style="height: 130px;">
+                    {% if p.image.startswith('http') or p.image.startswith('/static') or p.image.startswith('static/') %}
+                      <img src="{{ p.image }}" alt="{{ p.name[lang] }}" class="img-fluid" style="max-height: 100%; object-fit: contain;">
+                    {% else %}
+                      <img src="{{ url_for('static', filename=p.image) }}" alt="{{ p.name[lang] }}" class="img-fluid" style="max-height: 100%; object-fit: contain;">
+                    {% endif %}
+                </div>
+                
+                <h6 class="fs-6 fw-semibold mb-2 text-truncate-2" style="height: 40px; font-size: 0.9rem !important;">
+                   <a href="{{ url_for('main.product_detail', product_id=p.id) }}" class="text-dark text-decoration-none hover-navy">{{ p.name[lang] }}</a>
+                </h6>
+                <div class="fw-bold fs-5" style="color: var(--color-navy);">{{ '{:,}'.format(p.price) }} ₾</div>
+              </th>
+              {% endfor %}
+              
+              {% if products|length < 4 %}
+                 {% set slots_left = 4 - products|length %}
+                 {% for i in range(slots_left) %}
+                 <th class="p-3 text-center align-middle border-start bg-light-subtle" style="width: 19.5%;">
+                    <a href="{{ url_for('products.products') }}" class="btn btn-white border border-dashed rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center mb-2 text-muted" style="width: 50px; height: 50px; border-style: dashed !important;">
+                       <i class="bi bi-plus-lg fs-5"></i>
+                    </a>
+                    <div class="text-muted small fw-medium">{{ t('add_product') }}</div>
+                 </th>
+                 {% endfor %}
+              {% endif %}
+            </tr>
+          </thead>
+          
+          <tbody>
+            <tr class="table-light">
+              <td colspan="5" class="fw-bold px-4 py-2 text-dark border-bottom-0" style="font-size: 0.95rem; background-color: var(--color-surface-soft);">
+                {{ t('general_info') }}
+              </td>
+            </tr>
+            <tr>
+              <td class="text-secondary px-4 py-3 bg-white border-end small font-medium">{{ t('brand') }}</td>
+              {% for p in products %}<td class="text-center px-3 py-3 bg-white fw-semibold border-end text-dark fs-6">{{ p.brand_name }}</td>{% endfor %}
+              {% if products|length < 4 %}
+                 {% set slots_left = 4 - products|length %}
+                 {% for i in range(slots_left) %}<td class="bg-white border-end"></td>{% endfor %}
+              {% endif %}
+            </tr>
+            <tr>
+              <td class="text-secondary px-4 py-3 bg-white border-end small font-medium">{{ t('in_stock') }}</td>
+              {% for p in products %}
+                 <td class="text-center px-3 py-3 bg-white border-end">
+                    {% if p.in_stock %}
+                      <span class="badge bg-success-subtle text-success px-3 py-1 rounded-pill" style="font-size: 0.8rem;">{{ t('yes') }}</span>
+                    {% else %}
+                      <span class="badge bg-danger-subtle text-danger px-3 py-1 rounded-pill" style="font-size: 0.8rem;">{{ t('no') }}</span>
+                    {% endif %}
+                 </td>
+              {% endfor %}
+              {% if products|length < 4 %}
+                 {% set slots_left = 4 - products|length %}
+                 {% for i in range(slots_left) %}<td class="bg-white border-end"></td>{% endfor %}
+              {% endif %}
+            </tr>
+
+            {% if all_specs %}
+              <tr class="table-light">
+                <td colspan="5" class="fw-bold px-4 py-2 text-dark border-bottom-0" style="font-size: 0.95rem; background-color: var(--color-surface-soft);">
+                  {{ t('tech_specs') }}
+                </td>
+              </tr>
+              {% for spec_name in all_specs %}
+              <tr class="border-bottom">
+                <td class="text-secondary px-4 py-3 bg-white border-end small font-medium text-wrap" style="word-break: break-word; font-weight: 600;">
+                  {{ spec_name }}
+                </td>
+                
+                {% for p in products %}
+                  <td class="text-center px-3 py-3 bg-white border-end text-muted small fw-medium">
+                     {{ spec_map[p.id].get(spec_name, '-') }}
+                  </td>
+                {% endfor %}
+                
+                {% if products|length < 4 %}
+                  {% set slots_left = 4 - products|length %}
+                  {% for i in range(slots_left) %}
+                    <td class="bg-white border-end"></td>
+                  {% endfor %}
+                {% endif %}
+              </tr>
+              {% endfor %}
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      {# ცარიელი გვერდი #}
+      <div class="text-center py-5 my-4">
+        <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 90px; height: 90px;">
+          <i class="bi bi-arrow-left-right text-muted fs-2"></i>
+        </div>
+        <h4 class="fw-normal text-secondary mb-4">{{ t('compare_empty') }}</h4>
+        <a href="{{ url_for('products.products') }}" class="btn text-white rounded-pill px-5 py-2 fw-bold shadow-sm" style="background-color: var(--color-navy);">
+          {{ t('continue_shopping') }}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+  .hover-navy:hover { color: var(--color-navy) !important; }
+  .text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
+  }
+  .border-dashed { border-style: dashed !important; }
+  th, td { vertical-align: middle !important; }
+  .table > :not(caption) > * > * {
+    border-bottom-width: 1px;
+    border-color: var(--color-border);
+  }
+</style>
+{% endblock %}

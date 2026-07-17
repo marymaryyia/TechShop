@@ -1,0 +1,701 @@
+{% extends "base.html" %}
+{% from "_macros.html" import product_card with context %}
+{% block title %}{{ t('profile_title') }} - {{ t('site_name') }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.profile-page { padding: 32px 0 48px; }
+
+.profile-sidebar {
+  background: transparent;
+  padding: 0 20px 0 0;
+  position: sticky;
+  top: 90px;
+}
+.sidebar-greeting {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: 32px;
+}
+.profile-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.profile-menu li { margin-bottom: 8px; }
+.profile-menu a, .profile-menu button {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  transition: all 0.2s;
+}
+.profile-menu a:hover, .profile-menu button:hover {
+  background: var(--color-surface-soft);
+}
+.profile-menu a.active {
+  background: var(--color-surface-soft);
+  color: var(--color-navy);
+  border-radius: 12px 0 0 12px;
+  border-right: 4px solid var(--color-navy); 
+  border-left: none;
+}
+.profile-menu a i, .profile-menu button i {
+  font-size: 18px;
+}
+
+.profile-card {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+.profile-card-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: 24px;
+}
+
+.profile-input-wrap {
+  position: relative;
+  margin-bottom: 16px;
+}
+.profile-input-wrap input {
+  width: 100%;
+  background-color: #f3f4f6;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 24px 16px 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  outline: none;
+  transition: 0.2s;
+}
+.profile-input-wrap input:focus {
+  background-color: #fff;
+  border-color: var(--color-navy);
+  box-shadow: 0 0 0 4px rgba(0, 0, 50, 0.05);
+}
+.profile-input-wrap label {
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+  pointer-events: none;
+}
+.profile-input-wrap .edit-icon {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.btn-profile-primary {
+  background: var(--color-navy);
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: 0.2s;
+}
+.btn-profile-primary:hover { background: var(--color-navy-hover); }
+
+.btn-profile-update {
+  background-color: var(--color-navy);
+  color: #fff;
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 16px;
+  transition: background 0.2s;
+}
+.btn-profile-update:hover { 
+  background-color: var(--color-navy-hover); 
+}
+.btn-profile-danger {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.address-tabs {
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 24px;
+}
+.address-tabs .nav-link {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  padding: 12px 20px;
+  background: transparent;
+}
+.address-tabs .nav-link.active {
+  color: var(--color-navy);
+  border-bottom: 2px solid var(--color-navy);
+}
+.address-card-add {
+  border: 2px dashed #facc15;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 160px;
+  cursor: pointer;
+  color: #ca8a04;
+  font-weight: 600;
+  background: #fff;
+  transition: all 0.2s;
+}
+.address-card-add:hover { background: #fefce8; transform: translateY(-2px); }
+.address-card-saved {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 24px;
+  height: 100%;
+  min-height: 160px;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+.address-info-alert {
+  background: #f8fafc;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.order-tabs-header {
+    display: flex;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 24px;
+}
+.order-tabs-header button {
+    background: transparent;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.order-tabs-header button.active {
+    color: var(--color-navy);
+    border-bottom: 2px solid var(--color-navy);
+}
+
+.order-card-modern {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: box-shadow 0.2s;
+}
+.order-card-modern:hover {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+}
+.order-status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.status-pending { background: #f3f4f6; color: #4b5563; }
+.status-processing { background: #e0e7ff; color: #3730a3; }
+.status-shipped { background: #dbeafe; color: #1e40af; }
+.status-completed { background: #dcfce7; color: #166534; }
+.status-cancelled { background: #fee2e2; color: #991b1b; }
+
+@media (max-width: 768px) {
+  .profile-sidebar { position: static; margin-bottom: 20px; border-right: none !important; }
+  .order-row { grid-template-columns: 1fr; gap: 6px; padding: 16px; background: var(--color-surface-soft); border-radius: 10px; border-bottom: none; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+  <div class="container-xl">
+    <div class="row g-4">
+      
+      <div class="col-lg-3 border-end">
+        <div class="profile-sidebar">
+          
+          <div class="sidebar-greeting">
+            {{ t('hello') }}, {{ current_user.first_name }}
+          </div>
+
+          <ul class="profile-menu">
+            <li><a href="#orders" class="active" onclick="showTab('orders',this)"><i class="bi bi-bag"></i> {{ t('orders') }}</a></li>
+            <li><a href="#wishlist" onclick="showTab('wishlist',this)"><i class="bi bi-heart"></i> {{ t('wishlist') }}</a></li>
+            <li><a href="#promo" onclick="showTab('promo',this)"><i class="bi bi-ticket-perforated"></i> {{ t('promo_codes') }}</a></li>
+            <li><a href="#addresses" onclick="showTab('addresses',this)"><i class="bi bi-geo-alt"></i> {{ t('saved_addresses') }}</a></li>
+            <li><a href="#cards" onclick="showTab('cards',this)"><i class="bi bi-credit-card"></i> {{ t('saved_cards') }}</a></li>
+            <li><a href="#profile" onclick="showTab('profile',this)"><i class="bi bi-person"></i> {{ t('profile_details') }}</a></li>
+            
+            <li class="mt-4">
+              <form action="{{ url_for('auth.logout') }}" method="post" class="m-0">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button type="submit" class="text-danger">
+                  <i class="bi bi-box-arrow-right"></i> {{ t('logout') }}
+                </button>
+              </form>
+            </li>
+          </ul>
+          
+        </div>
+      </div>
+
+      <div class="col-lg-9 ps-lg-5">
+        
+        <div id="tab-orders" class="profile-tab">
+            <div class="order-tabs-header">
+                <button class="active" onclick="switchOrderTab('current', this)">{{ t('current_orders') }}</button>
+                <button onclick="switchOrderTab('completed', this)">{{ t('completed_orders') }}</button>
+            </div>
+
+            <div id="orders-current" class="orders-view-pane" style="display: block;">
+                {% set current_orders = orders | selectattr('status', 'in', ['pending', 'processing', 'shipped']) | list %}
+                
+                {% if current_orders %}
+                    {% for order in current_orders %}
+                    <div class="order-card-modern">
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                            <h6 class="m-0 fw-bold" style="color: var(--color-navy);">
+                                {{ t('order_number') }} #{{ order.id }}
+                            </h6>
+                            <span class="order-status-badge status-{{ order.status }}">
+                                {{ t('status_' ~ order.status) }}
+                            </span>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-6 col-md-4 mb-3 mb-md-0">
+                                <small class="text-muted d-block mb-1">{{ t('order_date') }}</small>
+                                <span class="fw-semibold">{{ order.created_at.strftime('%d.%m.%Y') if order.created_at else '-' }}</span>
+                            </div>
+                            <div class="col-6 col-md-4 mb-3 mb-md-0">
+                                <small class="text-muted d-block mb-1">{{ t('order_total') }}</small>
+                                <span class="fw-bold" style="color: var(--color-navy); font-size: 16px;">{{ "%.2f"|format(order.total) }} ₾</span>
+                            </div>
+                            <div class="col-12 col-md-4 text-md-end mt-2 mt-md-0">
+                                <a href="{{ url_for('profile.order_details', order_id=order.id) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px; font-weight: 600;">
+                                    {{ t('view_details') }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-box-seam text-muted" style="font-size:40px; opacity:0.3;"></i>
+                        <p class="text-muted mt-3">{{ t('no_current_orders') }}</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div id="orders-completed" class="orders-view-pane" style="display: none;">
+                {% set past_orders = orders | selectattr('status', 'in', ['completed', 'cancelled']) | list %}
+                
+                {% if past_orders %}
+                    {% for order in past_orders %}
+                    <div class="order-card-modern" style="opacity: 0.85;">
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                            <h6 class="m-0 fw-bold" style="color: var(--color-navy);">
+                                {{ t('order_number') }} #{{ order.id }}
+                            </h6>
+                            <span class="order-status-badge status-{{ order.status }}">
+                                {{ t('status_' ~ order.status) }}
+                            </span>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-6 col-md-4 mb-3 mb-md-0">
+                                <small class="text-muted d-block mb-1">{{ t('order_date') }}</small>
+                                <span class="fw-semibold">{{ order.created_at.strftime('%d.%m.%Y') if order.created_at else '-' }}</span>
+                            </div>
+                            <div class="col-6 col-md-4 mb-3 mb-md-0">
+                                <small class="text-muted d-block mb-1">{{ t('order_total') }}</small>
+                                <span class="fw-bold" style="color: var(--color-navy); font-size: 16px;">{{ "%.2f"|format(order.total) }} ₾</span>
+                            </div>
+                            <div class="col-12 col-md-4 text-md-end mt-2 mt-md-0">
+                                <a href="{{ url_for('profile.order_details', order_id=order.id) }}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px; font-weight: 600;">
+                                    {{ t('view_details') }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-clock-history text-muted" style="font-size:40px; opacity:0.3;"></i>
+                        <p class="text-muted mt-3">{{ t('order_history_empty') }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div id="tab-wishlist" class="profile-tab" style="display:none;">
+          <div class="profile-card">
+            <h3 class="profile-card-title">{{ t('your_wishlist') }}</h3>
+            {% set wishlist = wishlist_products %}
+            {% if wishlist %}
+            <div class="row g-3">
+              {% for p in wishlist %}
+              <div class="col-6 col-md-4">{{ product_card(p) }}</div>
+              {% endfor %}
+            </div>
+            {% else %}
+              <div class="text-center py-4">
+                <i class="bi bi-heart text-muted" style="font-size:40px; opacity:.4;"></i>
+                <p class="text-muted mt-2 mb-0">{{ t('wishlist_empty') }}</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div id="tab-promo" class="profile-tab" style="display:none;">
+          <div class="profile-card text-center py-5">
+            <i class="bi bi-ticket-perforated text-muted" style="font-size:40px; opacity:0.3;"></i>
+            <p class="text-muted mt-3">{{ t('no_promo_codes') }}</p>
+          </div>
+        </div>
+
+        <div id="tab-addresses" class="profile-tab" style="display:none;">
+          <div class="profile-card">
+            <h3 class="profile-card-title">{{ t('my_addresses') }}</h3>
+
+            <ul class="nav address-tabs" id="addressTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#physical" type="button" role="tab">{{ t('physical_person') }}</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#legal" type="button" role="tab">{{ t('legal_entity') }}</button>
+                </li>
+            </ul>
+
+            <div class="address-info-alert">
+                <i class="bi bi-info-circle-fill text-primary" style="font-size:20px;"></i>
+                <div>{{ t('address_contact_info') }}</div>
+            </div>
+
+            <div class="tab-content" id="addressTabsContent">
+                
+                <div class="tab-pane fade show active" id="physical" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="address-card-add" data-bs-toggle="modal" data-bs-target="#addPhysicalAddressModal">
+                                <i class="bi bi-geo-alt-fill mb-2" style="font-size:28px;"></i>
+                                <span>{{ t('add_new_address') }}</span>
+                            </div>
+                        </div>
+
+                        {% for addr in current_user.addresses if addr.label != 'Legal' %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="address-card-saved">
+                                <h6 class="fw-bold mb-3" style="color:var(--color-navy);">{{ addr.full_name }}</h6>
+                                <p class="text-muted mb-1" style="font-size:14px;">{{ addr.city }}, {{ addr.address_line2 }}</p>
+                                <p class="text-muted mb-0" style="font-size:14px;">{{ addr.address_line1 }}</p>
+                                <p class="text-muted mt-2 mb-0" style="font-size:13px;"><i class="bi bi-telephone"></i> {{ addr.phone }}</p>
+
+                                <form action="{{ url_for('profile.delete_address', addr_id=addr.id) }}" method="POST" class="position-absolute top-0 end-0 m-3">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0"><i class="bi bi-trash3"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="legal" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="address-card-add" data-bs-toggle="modal" data-bs-target="#addLegalAddressModal">
+                                <i class="bi bi-building mb-2" style="font-size:28px;"></i>
+                                <span>{{ t('add_new_address') }}</span>
+                            </div>
+                        </div>
+
+                        {% for addr in current_user.addresses if addr.label == 'Legal' %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="address-card-saved">
+                                <h6 class="fw-bold mb-3" style="color:var(--color-navy);">{{ addr.full_name }}</h6>
+                                <p class="text-muted mb-1" style="font-size:13px;">ს/კ: {{ addr.postal_code }}</p>
+                                <p class="text-muted mb-1" style="font-size:14px;">{{ addr.city }}, {{ addr.address_line2 }}</p>
+                                <p class="text-muted mb-0" style="font-size:14px;">{{ addr.address_line1 }}</p>
+                                <p class="text-muted mt-2 mb-0" style="font-size:13px;"><i class="bi bi-telephone"></i> {{ addr.phone }}</p>
+
+                                <form action="{{ url_for('profile.delete_address', addr_id=addr.id) }}" method="POST" class="position-absolute top-0 end-0 m-3">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0"><i class="bi bi-trash3"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-cards" class="profile-tab" style="display:none;">
+          <div class="profile-card text-center py-5">
+            <i class="bi bi-credit-card text-muted" style="font-size:40px; opacity:0.3;"></i>
+            <p class="text-muted mt-3">{{ t('no_saved_cards') }}</p>
+          </div>
+        </div>
+
+        <div id="tab-profile" class="profile-tab" style="display:none;">
+          
+          <div class="profile-card">
+            <h3 class="profile-card-title">{{ t('profile_details') }}</h3>
+            <form action="{{ url_for('profile.profile_update') }}" method="POST" style="max-width: 500px;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+              <div class="profile-input-wrap">
+                <label>{{ t('phone') }}</label>
+                <input type="text" name="phone" value="{{ current_user.phone or '' }}" placeholder="5XX XXX XXX">
+                <i class="bi bi-pencil edit-icon"></i>
+              </div>
+
+              <div class="profile-input-wrap">
+                <label>{{ t('email') }}</label>
+                <input type="email" name="email" value="{{ current_user.email }}" readonly style="color: #9ca3af; cursor: not-allowed;">
+              </div>
+
+              <div class="profile-input-wrap">
+                <label>{{ t('full_name') }} (სახელი)</label>
+                <input type="text" name="first_name" value="{{ current_user.first_name }}">
+                <i class="bi bi-pencil edit-icon"></i>
+              </div>
+
+              <div class="profile-input-wrap">
+                <label>გვარი</label>
+                <input type="text" name="last_name" value="{{ current_user.last_name }}">
+                <i class="bi bi-pencil edit-icon"></i>
+              </div>
+
+              <button type="submit" class="btn-profile-update">{{ t('update_profile') }}</button>
+            </form>
+          </div>
+
+          <div class="profile-card mt-4">
+            <h3 class="profile-card-title">{{ t('change_password') }}</h3>
+            <form action="{{ url_for('profile.profile_change_password') }}" method="post" style="max-width: 500px;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              
+              <div class="profile-input-wrap">
+                <label>{{ t('current_password') }}</label>
+                <input type="password" name="current_password" required>
+              </div>
+
+              <div class="profile-input-wrap">
+                <label>{{ t('new_password') }}</label>
+                <input type="password" name="new_password" required minlength="6">
+              </div>
+
+              <button type="submit" class="btn-profile-primary w-100 mt-2">{{ t('update_password') }}</button>
+            </form>
+          </div>
+
+          <div class="profile-card mt-4">
+            <h3 class="profile-card-title text-danger"><i class="bi bi-trash3"></i> {{ t('danger_zone') }}</h3>
+            <p style="font-size:13px; color:var(--color-text-muted); margin-bottom:16px;">{{ t('delete_account_warning') }}</p>
+            
+            <form action="{{ url_for('profile.profile_delete') }}" method="post" onsubmit="return confirm('{{ t('delete_account_confirm') }}');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button type="submit" class="btn-profile-danger">
+                <i class="bi bi-trash"></i> {{ t('delete_account') }}
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addPhysicalAddressModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:20px;">
+            <div class="modal-header border-0 pb-0 mt-2 px-4">
+                <h5 class="modal-title fw-bold">{{ t('physical_person') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="{{ url_for('profile.add_address') }}" method="POST" class="row g-3">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="address_type" value="Physical"/>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label text-muted" style="font-size:13px;">{{ t('first_name') }}</label>
+                        <input type="text" name="first_name" class="form-control" style="border-radius:10px; padding:12px;" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted" style="font-size:13px;">{{ t('last_name') }}</label>
+                        <input type="text" name="last_name" class="form-control" style="border-radius:10px; padding:12px;" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label text-muted" style="font-size:13px;">{{ t('city') }}</label>
+                        <select name="city" class="form-control form-select" style="border-radius:10px; padding:12px;" required>
+                            <option value="" disabled selected>{{ t('select_city') }}</option>
+                            <option value="Tbilisi">{{ t('tbilisi') }}</option>
+                            <option value="Batumi">{{ t('batumi') }}</option>
+                            <option value="Kutaisi">{{ t('kutaisi') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted" style="font-size:13px;">{{ t('district') }}</label>
+                        <select name="district" class="form-control form-select" style="border-radius:10px; padding:12px;" required>
+                            <option value="" disabled selected>{{ t('select_district') }}</option>
+                            <option value="Vake">ვაკე</option>
+                            <option value="Saburtalo">საბურთალო</option>
+                            <option value="Gldani">გლდანი</option>
+                            <option value="Other">სხვა</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label text-muted" style="font-size:13px;">{{ t('phone') }}</label>
+                        <input type="text" name="phone" class="form-control" placeholder="5XX XXX XXX" style="border-radius:10px; padding:12px;" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label text-muted" style="font-size:13px;">{{ t('exact_address') }}</label>
+                        <input type="text" name="address_line1" class="form-control" style="border-radius:10px; padding:12px;" required>
+                    </div>
+                    
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-profile-primary w-100" style="border-radius:10px; padding:12px; font-size:15px;">{{ t('save_address') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addLegalAddressModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:20px;">
+            <div class="modal-header border-0 pb-0 mt-2 px-4">
+                <h5 class="modal-title fw-bold">{{ t('legal_entity') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="{{ url_for('profile.add_address') }}" method="POST" class="row g-3">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="address_type" value="Legal"/>
+                    
+                    <div class="col-12">
+                        <label class="form-label text-muted" style="font-size:13px;">{{ t('org_name') }}</label>
+                        <input type="text" name="org_name" class="form-control" style="border-radius:10px; padding:12px;" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label text-muted" style="font-size:13px;">{{ t('city') }}</label>
+                        <select name="city" class="form-control form-select" style="border-radius:10px; padding:12px;" required>
+                            <option value="" disabled selected>{{ t('select_city') }}</option>
+                            <option value="Tbilisi">{{ t('tbilisi') }}</option>
+                            <option value="Batumi">{{ t('batumi') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted" style="font-size:13px;">{{ t('district') }}</label>
+                        <select name="district" class="form-control form-select" style="border-radius:10px; padding:12px;" required>
+                            <option value="" disabled selected>{{ t('select_district') }}</option>
+                            <option value="Vake">ვაკე</option>
+                            <option value="Saburtalo">საბურთალო</option>
+                            <option value="Other">სხვა</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label text-muted" style="font-size:13px;">{{ t('tax_id') }}</label>
+                        <input type="text" name="tax_id" class="form-control" style="border-radius:10px; padding:12px;" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted" style="font-size:13px;">{{ t('phone') }}</label>
+                        <input type="text" name="phone" class="form-control" style="border-radius:10px; padding:12px;" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label text-muted" style="font-size:13px;">{{ t('exact_address') }}</label>
+                        <input type="text" name="address_line1" class="form-control" style="border-radius:10px; padding:12px;" required>
+                    </div>
+                    
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-profile-primary w-100" style="border-radius:10px; padding:12px; font-size:15px;">{{ t('save_address') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(tabId, el) {
+  document.querySelectorAll('.profile-tab').forEach(function(t) { t.style.display = 'none'; });
+  document.getElementById('tab-' + tabId).style.display = 'block';
+  
+  document.querySelectorAll('.profile-menu a').forEach(function(a) { a.classList.remove('active'); });
+  if(el) el.classList.add('active');
+  window.location.hash = tabId;
+}
+
+window.onload = function() {
+  const hash = window.location.hash.replace('#', '');
+  if (hash) {
+    const el = document.querySelector('a[href="#' + hash + '"]');
+    if(el) showTab(hash, el);
+  }
+};
+
+function switchOrderTab(tabName, btn) {
+    document.querySelectorAll('.orders-view-pane').forEach(el => el.style.display = 'none');
+    document.getElementById('orders-' + tabName).style.display = 'block';
+    
+    const buttons = btn.parentElement.querySelectorAll('button');
+    buttons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+</script>
+{% endblock %}

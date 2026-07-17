@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if group else 'New' }} Mega Group{% endblock %}
+{% block page_title %}{{ 'Edit' if group else 'New' }} Mega Group{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="stat-card">
+      <form method="post" class="form-admin">
+        <div class="mb-3">
+          <label>Category</label>
+          <select name="category_id" class="form-select" required>
+            <option value="">Select Category</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if group and group.category_id == cat.id %}selected{% endif %}>{{ cat.name_en }} ({{ cat.name_ka }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label>Title (KA)</label>
+          <input type="text" name="title_ka" value="{{ group.title_ka if group else '' }}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label>Title (EN)</label>
+          <input type="text" name="title_en" value="{{ group.title_en if group else '' }}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label>Sort Order</label>
+          <input type="number" name="sort_order" value="{{ group.sort_order if group else 0 }}" class="form-control">
+          <div class="form-text" style="font-size: 12px; color: var(--color-text-muted);">Lower numbers appear first.</div>
+        </div>
+        <button type="submit" class="btn-admin">Save Mega Group</button>
+        <a href="{{ url_for('admin.admin_mega_groups') }}" class="btn-admin-outline ms-2">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

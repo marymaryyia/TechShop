@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% from "_macros.html" import product_card with context %}
+
+{% block title %}{{ t('search_page_title') }} - {{ t('site_name') }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .empty-search-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--color-surface);
+      border-radius: 12px;
+      border: 1px dashed var(--color-border);
+      max-width: 900px;
+      margin: 40px auto;
+  }
+  .empty-search-state i.bi-search {
+      font-size: 64px;
+      color: var(--color-border);
+      margin-bottom: 16px;
+      display: block;
+  }
+  .continue-shopping-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-navy);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 18px;
+      font-weight: 600;
+      font-size: 14px;
+      white-space: nowrap;
+      text-decoration: none;
+      transition: background .2s;
+  }
+  .continue-shopping-btn:hover,
+  .continue-shopping-btn:focus {
+      background: var(--color-navy-hover);
+      color: #ffffff;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="section-pad">
+  <div class="container-xl">
+    
+    {% if query %}
+    <div class="section-header d-flex justify-content-between align-items-end mb-4">
+      <h2 class="section-title mb-0">{{ t('search_results_for') }} "{{ query }}"</h2>
+      <span class="results-count text-muted" style="font-size: 14px;">{{ results|length }} {{ t('results_found') }}</span>
+    </div>
+
+    {% if results %}
+    <div class="row g-3">
+      {% for p in results %}
+      <div class="col-6 col-md-4 col-lg-3">
+        {{ product_card(p) }}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-search-state">
+      <i class="bi bi-search"></i>
+      <h3 class="mb-3" style="color: var(--color-text); font-weight: 500;">{{ t('no_results') }}</h3>
+      <p class="text-muted mb-4">{{ t('no_results_hint') }}</p>
+      
+      <a href="{{ url_for('products.products') }}" class="continue-shopping-btn">
+        <i class="bi bi-arrow-left me-2"></i> პროდუქტები 
+      </a>
+    </div>
+    
+    {% endif %}
+    
+    {% else %}
+    <div class="empty-search-state">
+      <i class="bi bi-search"></i>
+      <h3 class="mb-3" style="color: var(--color-text); font-weight: 500;">{{ t('search_page_title') }}</h3>
+      <p class="text-muted mb-4">{{ t('search_placeholder') }}</p>
+      
+      <a href="{{ url_for('products.products') }}" class="continue-shopping-btn">
+        <i class="bi bi-arrow-left me-2"></i> პროდუქტები
+      </a>
+    </div>
+    
+    {% endif %}
+    
+  </div>
+</section>
+{% endblock %}

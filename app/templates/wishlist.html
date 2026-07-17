@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% from "_macros.html" import product_card with context %}
+
+{% block title %}{{ t('your_wishlist') }} - {{ t('site_name') }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .empty-wishlist-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--color-surface);
+      border-radius: 12px;
+      border: 1px dashed var(--color-border);
+      max-width: 900px;
+      margin: 0 auto;
+  }
+  .empty-wishlist-state i.bi-heart {
+      font-size: 64px;
+      color: var(--color-border);
+      margin-bottom: 16px;
+      display: block;
+  }
+  .continue-shopping-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-navy);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 18px;
+      font-weight: 600;
+      font-size: 14px;
+      white-space: nowrap;
+      text-decoration: none;
+      transition: background .2s;
+  }
+  .continue-shopping-btn:hover,
+  .continue-shopping-btn:focus {
+      background: var(--color-navy-hover);
+      color: #ffffff;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="section-pad">
+  <div class="container-xl">
+    {% if products %}
+    <div class="row g-3">
+      {% for p in products %}
+      <div class="col-6 col-md-4 col-lg-3">
+        {{ product_card(p) }}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    
+    <div class="empty-wishlist-state">
+      
+      <i class="bi bi-heart"></i>
+      
+      <h3 class="mb-3" style="color: var(--color-text); font-weight: 500;">{{ t('wishlist_empty') }}</h3>
+      
+      <p class="text-muted mb-4">{{ t('wishlist_empty_hint') }}</p>
+      
+      <a href="{{ url_for('products.products') }}" class="continue-shopping-btn">
+        <i class="bi bi-arrow-left me-2"></i> {{ t('continue_shopping') }}
+      </a>
+      
+    </div>
+    
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

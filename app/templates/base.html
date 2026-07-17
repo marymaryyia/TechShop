@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="{{ lang }}" data-theme="light" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}{{ t('site_name') }}{% endblock %}</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    {% block extra_head %}{% endblock %}
+    <script>
+      (function () {
+        var saved = null;
+        try {
+          saved = localStorage.getItem("theme");
+        } catch (e) {}
+        var theme =
+          saved === "dark" || saved === "light"
+            ? saved
+            : window.matchMedia &&
+                window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+        document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.setAttribute("data-bs-theme", theme);
+      })();
+    </script>
+  </head>
+  <body>
+    
+    <!-- Category Navigation Bar -->
+    <nav class="category-nav d-none d-lg-block" style="position: relative; z-index: 1030;">
+      <div class="container-xl">
+        <div class="d-flex flex-wrap align-items-center">
+          <ul class="nav-links d-flex flex-wrap list-unstyled mb-0 gap-1">
+            <li>
+              <a
+                href="{{ url_for('products.products', sort='newest') }}"
+                class="nav-link-item {% if request.path == url_for('products.products') and request.args.get('sort') == 'newest' %}active{% endif %}"
+                >{{ t('new_arrivals') }}</a
+              >
+            </li>
+            <li>
+              <a
+                href="{{ url_for('main.index') }}#brands"
+                class="nav-link-item"
+                >{{ t('brands') }}</a
+              >
+            </li>
+          </ul>
+          
+          <div class="ms-auto d-flex align-items-center gap-2">
+            <div class="ms-auto d-flex align-items-center gap-3">
+  
+  <div class="dropdown">
+    <button class="btn p-0 border-0 bg-transparent d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none;">
+      {% if lang == 'ka' %}
+        <img src="https://flagcdn.com/ge.svg" title="ქართული" style="width: 24px; height: auto;" alt="KA" />
+      {% else %}
+        <img src="https://flagcdn.com/us.svg" title="English" style="width: 24px; height: auto;" alt="EN" />
+      {% endif %}
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width: auto; padding: 0.5rem;">
+      {% if lang != 'ka' %}
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2 rounded" href="{{ url_for('language.set_language', lang_code='ka', next=request.full_path) }}">
+          <img src="https://flagcdn.com/ge.svg" style="width: 20px; height: auto;" alt="KA" /> ქართული
+        </a>
+      </li>
+      {% endif %}
+      {% if lang != 'en' %}
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2 rounded" href="{{ url_for('language.set_language', lang_code='en', next=request.full_path) }}">
+          <img src="https://flagcdn.com/us.svg" style="width: 20px; height: auto;" alt="EN" /> English
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+
+  <button
+  type="button"
+  id="themeToggle"
+  class="btn d-flex align-items-center justify-content-center ms-2"
+  title="{{ t('theme_toggle') }}"
+  aria-label="{{ t('theme_toggle') }}"
+  aria-pressed="false"
+  style="width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; transition: all 0.3s ease; backdrop-filter: blur(4px);"
+>
+  <i class="bi bi-moon-stars" style="font-size: 1.1rem;"></i>
+</button>
+
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Header -->
+    <header class="main-header sticky-top">
+      <div class="container-xl">
+        <div class="d-flex flex-wrap align-items-center gap-2 py-2">
+          <a class="navbar-brand me-2" href="{{ url_for('main.index') }}">
+            {% if lang == 'ka' %}
+              <img src="{{ url_for('static', filename='images/logo_ka_light.png') }}" class="logo-light" alt="ტექშოპი" style="height: 40px; width: auto;">
+              <img src="{{ url_for('static', filename='images/logo_ka_dark.png') }}" class="logo-dark" alt="ტექშოპი" style="height: 40px; width: auto;">
+            {% else %}
+              <img src="{{ url_for('static', filename='images/logo_en_light.png') }}" class="logo-light" alt="TechShop" style="height: 40px; width: auto;">
+              <img src="{{ url_for('static', filename='images/logo_en_dark.png') }}" class="logo-dark" alt="TechShop" style="height: 40px; width: auto;">
+            {% endif %}
+          </a>
+          <button
+            class="navbar-toggler d-lg-none ms-auto"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mobileNav"
+            aria-controls="mobileNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <i class="bi bi-list"></i>
+          </button>
+
+          <!-- Catalog Dropdown -->
+<div class="catalog-dropdown d-none d-lg-block">
+  <button id="megaToggle" class="btn btn-catalog" type="button">
+    <i class="bi bi-grid-fill"></i>
+    <span class="d-none d-lg-inline">{{ t('categories') }}</span>
+  </button>
+  <div id="megaMenu" class="mega-menu">
+    <div class="mega-sidebar">
+      {% for cat in mega_menu %}
+      <div class="mega-category" data-cat="{{ cat['slug'] }}">
+        <a href="{{ url_for('products.products', category=cat['slug']) }}">
+          <i class="bi {{ cat['icon'] }}"></i>
+          {{ cat['name_' ~ lang] }}
+          <i class="bi bi-chevron-right ms-auto"></i>
+        </a>
+        
+        <div class="mega-content">
+          <div class="mega-grid">
+            {% for group in cat['groups'] %}
+            <div>
+              <h5>{{ group['title_' ~ lang] }}</h5> 
+              <ul>
+                {% for item in group['items'] %}
+                <li><a href="{{ item['url'] }}">{{ item['name_' ~ lang] }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+            {% endfor %}
+          </div>
+          
+          <img src="{{ url_for('static', filename='images/mega/' ~ cat['slug'] ~ '.png') }}" 
+               class="mega-category-img" 
+               alt="{{ cat['name_' ~ lang] }}"
+               onerror="this.style.display='none'"> 
+        </div> </div> {% endfor %}
+    </div> </div> </div>
+
+          <!-- Search Bar -->
+          <form
+            action="{{ url_for('main.search') }}"
+            method="get"
+            class="search-bar flex-grow-1 d-none d-md-flex"
+          >
+            <div class="input-group">
+              <button type="submit" class="btn btn-search">
+                <i class="bi bi-search"></i>
+              </button>
+              <input
+                type="text"
+                name="q"
+                value="{{ request.args.get('q', '') }}"
+                class="form-control search-input"
+                placeholder="{{ t('search_placeholder') }}"
+                required
+              />
+            </div>
+          </form>
+
+          <div class="d-xl-none d-flex d-md-none">
+            <a
+              href="{{ url_for('main.search') }}"
+              class="btn btn-search-mobile ms-auto"
+              ><i class="bi bi-search"></i
+            ></a>
+          </div>
+
+          <!-- Header Icons -->
+          <div
+            class="d-none d-lg-flex align-items-center gap-2 ms-auto ms-md-0"
+          >
+            <a
+              href="{{ url_for('compare.compare') }}"
+              class="header-icon-btn d-none d-lg-flex"
+              title="{{ t('compare') }}"
+            >
+              <i class="bi bi-arrow-left-right"></i>
+              {% if compare_count %}<span class="mini-count"
+                >{{ compare_count }}</span
+              >{% endif %}
+              <span class="icon-label">{{ t('compare') }}</span>
+            </a>
+            <a
+              href="{{ url_for('wishlist.wishlist') }}"
+              class="header-icon-btn"
+              title="{{ t('wishlist') }}"
+            >
+              <i
+                class="bi {% if wishlist_count %}bi-heart-fill{% else %}bi-heart{% endif %}"
+              ></i>
+              {% if wishlist_count %}<span class="mini-count"
+                >{{ wishlist_count }}</span
+              >{% endif %}
+              <span class="icon-label d-none d-lg-inline"
+                >{{ t('wishlist') }}</span
+              >
+            </a>{% if current_user.is_authenticated %}
+  <div class="dropdown">
+    <a href="#" 
+       class="header-icon-btn d-flex flex-column align-items-center text-decoration-none" 
+       data-bs-toggle="dropdown" 
+       aria-expanded="false" 
+       title="{{ current_user.first_name }}">
+      <i class="bi bi-person-check-fill" style="font-size: 1.5rem; line-height: 1;"></i>
+      <span class="icon-label" style="display: block !important; font-size: 0.75rem; margin-top: 4px;">
+        {{ current_user.first_name }}
+      </span>
+    </a>
+
+    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" style="border-radius: 12px; padding: 8px;">
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ url_for('profile.profile') }}">
+          <i class="bi bi-person-lines-fill"></i> {{ t('profile') }}
+        </a>
+      </li>
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <form action="{{ url_for('auth.logout') }}" method="post" class="m-0">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <button type="submit" class="dropdown-item d-flex align-items-center gap-2 py-2 text-danger">
+            <i class="bi bi-box-arrow-right"></i> {{ t('logout') }}
+          </button>
+        </form>
+      </li>
+    </ul>
+  </div>
+{% else %}
+  <a href="{{ url_for('auth.login', next=request.full_path) }}" 
+     class="header-icon-btn d-flex flex-column align-items-center text-decoration-none">
+    <i class="bi bi-person" style="font-size: 1.5rem; line-height: 1;"></i>
+    <span class="icon-label" style="display: block !important; font-size: 0.75rem; margin-top: 4px;">
+      {{ t('login') }}
+    </span>
+  </a>
+{% endif %}
+            <a
+              href="{{ url_for('cart.cart') }}"
+              class="cart-btn"
+              title="{{ t('cart') }}"
+            >
+              <i class="bi bi-cart3"></i>
+              {% if cart_count %}<span class="cart-count">{{ cart_count }}</span
+              >{% endif %}
+              <span class="icon-label d-none d-lg-inline ms-1"
+                >{{ t('cart') }}</span
+              >
+            </a>
+          </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div class="collapse d-lg-none" id="mobileNav">
+          <div class="mobile-nav-body py-3">
+            <form
+              action="{{ url_for('main.search') }}"
+              method="get"
+              class="mb-3"
+            >
+              <div class="input-group">
+                <button type="submit" class="btn btn-search">
+                  <i class="bi bi-search"></i>
+                </button>
+                <input
+                  type="text"
+                  name="q"
+                  class="form-control search-input"
+                  placeholder="{{ t('search_placeholder') }}"
+                  required
+                />
+              </div>
+            </form>
+            <ul class="list-unstyled mobile-nav-links mb-3">
+              {% for cat in categories %}
+              <li>
+                <a href="{{ url_for('products.products', category=cat.slug) }}"
+                  ><i class="bi {{ cat.icon_class }} me-2"></i>{{ cat.name[lang]
+                  }}</a
+                >
+              </li>
+              {% endfor %}
+            </ul>
+            <div class="d-flex align-items-center gap-3">
+              <div class="ms-auto d-flex align-items-center gap-3">
+  
+  <div class="dropdown">
+    <button class="btn p-0 border-0 bg-transparent d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="box-shadow: none;">
+      {% if lang == 'ka' %}
+        <img src="https://flagcdn.com/ge.svg" title="ქართული" style="width: 24px; height: auto;" alt="KA" />
+      {% else %}
+        <img src="https://flagcdn.com/us.svg" title="English" style="width: 24px; height: auto;" alt="EN" />
+      {% endif %}
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width: auto; padding: 0.5rem;">
+      {% if lang != 'ka' %}
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2 rounded" href="{{ url_for('language.set_language', lang_code='ka', next=request.full_path) }}">
+          <img src="https://flagcdn.com/ge.svg" style="width: 20px; height: auto;" alt="KA" /> ქართული
+        </a>
+      </li>
+      {% endif %}
+      {% if lang != 'en' %}
+      <li>
+        <a class="dropdown-item d-flex align-items-center gap-2 rounded" href="{{ url_for('language.set_language', lang_code='en', next=request.full_path) }}">
+          <img src="https://flagcdn.com/us.svg" style="width: 20px; height: auto;" alt="EN" /> English
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+
+  <button
+    type="button"
+    class="btn p-0 border-0 bg-transparent d-flex align-items-center"
+    id="themeToggle"
+    title="{{ t('theme_toggle') }}"
+    aria-label="{{ t('theme_toggle') }}"
+    aria-pressed="false"
+    style="box-shadow: none; color: inherit;"
+  >
+    <i class="bi bi-moon-stars" style="font-size: 1.25rem;"></i>
+  </button>
+
+</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>{% block content %}{% endblock %}</main>
+
+    <!-- Footer -->
+    <footer class="site-footer mt-5">
+      <div class="footer-top">
+        <div class="container-xl">
+          <div class="row g-4 justify-content-between">
+            <div class="col-lg-4 col-md-6">
+              <div class="footer-logo mb-3">
+                {% if lang == 'ka' %}
+                  <img src="{{ url_for('static', filename='images/logo_ka_light.png') }}" class="logo-light" alt="ტექშოპი" style="height: 40px; width: auto;">
+                  <img src="{{ url_for('static', filename='images/logo_ka_dark.png') }}" class="logo-dark" alt="ტექშოპი" style="height: 40px; width: auto;">
+                {% else %}
+                  <img src="{{ url_for('static', filename='images/logo_en_light.png') }}" class="logo-light" alt="TechShop" style="height: 40px; width: auto;">
+                  <img src="{{ url_for('static', filename='images/logo_en_dark.png') }}" class="logo-dark" alt="TechShop" style="height: 40px; width: auto;">
+                {% endif %}
+              </div>
+              <p class="footer-desc">{{ t('footer_about') }}</p>
+              
+              <!-- TBC Logo instead of social links -->
+              <div class="mt-4">
+                <img src="/static/images/Tbc-logo-ka_GE.svg.png" alt="TBC Bank" style="height: 40px; width: auto;">
+              </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+              <h6 class="footer-heading">{{ t('categories') }}</h6>
+              <ul class="footer-links list-unstyled">
+                {% for cat in categories[:5] %}
+                <li class="mb-2">
+                  <a href="{{ url_for('products.products', category=cat.slug) }}" class="text-decoration-none"
+                    >{{ cat.name[lang] }}</a
+                  >
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+            
+            <div class="col-lg-2 col-md-6">
+              <h6 class="footer-heading">{{ t('information') }}</h6>
+              <ul class="footer-links list-unstyled">
+                <li class="mb-2"><a href="#" class="text-decoration-none">{{ t('about_us') }}</a></li>
+                <li class="mb-2"><a href="#" class="text-decoration-none">{{ t('delivery_info') }}</a></li>
+                <li class="mb-2"><a href="#" class="text-decoration-none">{{ t('return_policy') }}</a></li>
+                <li class="mb-2"><a href="#" class="text-decoration-none">{{ t('warranty') }}</a></li>
+                <li class="mb-2"><a href="#" class="text-decoration-none">{{ t('privacy_policy') }}</a></li>
+              </ul>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+              <h6 class="footer-heading">{{ t('customer_service') }}</h6>
+              <ul class="footer-links list-unstyled">
+                <li class="mb-2">
+                  <a href="{{ url_for('auth.login') }}" class="text-decoration-none"
+                    >{{ t('my_account') }}</a
+                  >
+                </li>
+                <li class="mb-2"><a href="#" class="text-decoration-none">{{ t('order_tracking') }}</a></li>
+                <li class="mb-2">
+                  <a href="{{ url_for('wishlist.wishlist') }}" class="text-decoration-none"
+                    >{{ t('wishlist') }}</a
+                  >
+                </li>
+                <li class="mb-2"><a href="#" class="text-decoration-none">{{ t('contact_us') }}</a></li>
+                <li class="mb-2"><a href="#" class="text-decoration-none">{{ t('faq') }}</a></li>
+              </ul>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container-xl d-flex flex-column flex-md-row align-items-center justify-content-between">
+          <span>{{ t('all_rights') }}</span>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+
+    <!-- Bottom Mobile Nav -->
+    <div class="d-lg-none fixed-bottom bottom-mobile-nav">
+      <div class="container-fluid">
+        <div class="row text-center py-2">
+          <div class="col">
+            <a href="{{ url_for('main.index') }}" class="bottom-nav-link"
+              ><i class="bi bi-house d-block"></i
+              ><small>{{ t('home') }}</small></a
+            >
+          </div>
+          <div class="col">
+            <a
+              href="{{ url_for('products.products', sort='price_asc') }}"
+              class="bottom-nav-link"
+              ><i class="bi bi-gift d-block"></i
+              ><small>{{ t('deals') }}</small></a
+            >
+          </div>
+          <div class="col">
+            <a href="{{ url_for('wishlist.wishlist') }}" class="bottom-nav-link"
+              ><i
+                class="bi {% if wishlist_count %}bi-heart-fill{% else %}bi-heart{% endif %} d-block"
+              ></i
+              ><small>{{ t('wishlist') }}</small></a
+            >
+          </div>
+          <div class="col">
+            <a href="{{ url_for('cart.cart') }}" class="bottom-nav-link"
+              ><i class="bi bi-cart3 d-block"></i
+              ><small>{{ t('cart') }}</small></a
+            >
+          </div>
+         <div class="col">
+  {% if current_user.is_authenticated %}
+    <a href="{{ url_for('profile.profile') }}" class="bottom-nav-link">
+      <i class="bi bi-person-check-fill d-block"></i>
+      <small>{{ current_user.first_name }}</small>
+    </a>
+  {% else %}
+    <a href="{{ url_for('auth.login', next=request.full_path) }}" class="bottom-nav-link">
+      <i class="bi bi-person d-block"></i>
+      <small>{{ t('login') }}</small>
+    </a>
+  {% endif %}
+</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mega Menu Script -->
+    <script>
+      (function () {
+        var btn = document.getElementById("megaToggle");
+        var menu = document.getElementById("megaMenu");
+        if (!btn || !menu) return;
+
+        var open = false;
+
+        function openMenu() {
+          menu.classList.add("show");
+          open = true;
+        }
+        function closeMenu() {
+          menu.classList.remove("show");
+          open = false;
+        }
+
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          if (open) closeMenu();
+          else openMenu();
+        });
+
+        document.addEventListener("click", function (e) {
+          if (open && !menu.contains(e.target) && e.target !== btn) {
+            closeMenu();
+          }
+        });
+
+        menu.addEventListener("click", function (e) {
+          e.stopPropagation();
+        });
+
+        // Hover-based mega content for desktop
+        var cats = document.querySelectorAll(".mega-category");
+        cats.forEach(function (cat) {
+          var content = cat.querySelector(".mega-content");
+          if (!content) return;
+          cat.addEventListener("mouseenter", function () {
+            document.querySelectorAll(".mega-content").forEach(function (c) {
+              if (c !== content) c.style.display = "none";
+            });
+            content.style.display = "block";
+          });
+        });
+      })();
+      
+    </script>
+    <div class="chatbot-widget">
+  <button id="chatbot-toggle" class="chatbot-toggle-btn" title="დახმარება">
+    <i class="bi bi-chat-dots-fill"></i>
+  </button>
+  <div id="chatbot-window" class="chatbot-window d-none">
+    <div class="chatbot-header">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-robot"></i>
+        <span>ტექშოპის ასისტენტი</span>
+      </div>
+      <button id="chatbot-close" class="btn-close btn-close-white" style="font-size: 0.8rem;"></button>
+    </div>
+    <div id="chatbot-messages" class="chatbot-messages">
+  {% if lang == 'en' %}
+    <div class="chat-message bot-message">Hello! I am TechShop's AI assistant. How can I help you today? 🤖</div>
+  {% else %}
+    <div class="chat-message bot-message">გამარჯობა! მე ვარ ტექშოპის AI ასისტენტი. რით შემიძლია დაგეხმაროთ? 🤖</div>
+  {% endif %}
+</div>
+    <div class="chatbot-input-area">
+      <input type="text" id="chatbot-input" placeholder="{% if lang == 'en' %}Type a message...{% else %}მოიწერეთ შეკითხვა...{% endif %}" autocomplete="off" />
+      <button id="chatbot-send"><i class="bi bi-send-fill"></i></button>
+    </div>
+  </div>
+</div>
+  </body>
+</html>

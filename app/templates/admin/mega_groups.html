@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}
+{% block title %}Mega Groups{% endblock %}
+{% block page_title %}Mega Groups{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div class="d-flex gap-2 flex-wrap align-items-center">
+    <a href="{{ url_for('admin.admin_mega_group_create') }}" class="btn-admin"><i class="bi bi-plus-lg me-1"></i> Add Mega Group</a>
+    <a href="{{ url_for('admin.admin_mega_items') }}" class="btn-admin-outline"><i class="bi bi-link-45deg me-1"></i> Manage Items</a>
+  </div>
+  <form class="search-admin d-flex gap-2" method="get">
+    <select name="category" class="form-select" style="border-radius: 8px; min-width: 180px;" onchange="this.form.submit()">
+      <option value="">All Categories</option>
+      {% for cat in categories %}
+      <option value="{{ cat.id }}" {% if selected_category == cat.id %}selected{% endif %}>{{ cat.name_en }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+<div class="admin-table">
+  <table class="table mb-0">
+    <thead>
+      <tr><th>Title (EN)</th><th>Title (KA)</th><th>Category</th><th>Items</th><th>Sort</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for g in groups %}
+      <tr>
+        <td style="font-weight: 600;">{{ g.title_en }}</td>
+        <td style="font-size: 12px; color: var(--color-text-muted);">{{ g.title_ka }}</td>
+        <td>
+          {% if g.category %}
+          <span class="badge-admin" style="background: var(--color-navy-bg); color: var(--color-navy);">{{ g.category.name_en }}</span>
+          {% else %}-{% endif %}
+        </td>
+        <td>{{ g.items.count() }}</td>
+        <td>{{ g.sort_order }}</td>
+        <td>
+          <a href="{{ url_for('admin.admin_mega_group_edit', group_id=g.id) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px;"><i class="bi bi-pencil"></i></a>
+          <form action="{{ url_for('admin.admin_mega_group_delete', group_id=g.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this MegaGroup? All items inside will be deleted.');">
+            <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius: 6px;"><i class="bi bi-trash"></i></button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="text-center text-muted py-5">No mega groups found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

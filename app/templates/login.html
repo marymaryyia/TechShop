@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}{{ t('login') }} - {{ t('site_name') }}{% endblock %}
+{% block extra_head %}
+<style>
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-bg) 100%);
+  padding: 40px 20px;
+}
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 48px 40px;
+  box-shadow: 0 20px 60px var(--color-shadow-strong);
+  position: relative;
+  overflow: hidden;
+}
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-navy), var(--color-orange));
+}
+.auth-logo {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.auth-logo .logo-tech { font-size: 32px; }
+.auth-logo .logo-shop { font-size: 32px; }
+.auth-heading {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-text);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.auth-subheading {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-bottom: 32px;
+}
+.floating-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+.floating-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 500;
+  transition: all .2s ease;
+  outline: none;
+}
+.floating-input:focus {
+  border-color: var(--color-navy);
+  box-shadow: 0 0 0 4px rgba(0,19,103,.08);
+}
+.floating-label {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--color-bg);
+  padding: 0 6px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  pointer-events: none;
+  transition: all .2s ease;
+}
+.floating-input:focus + .floating-label,
+.floating-input:not(:placeholder-shown) + .floating-label {
+  top: 0;
+  font-size: 12px;
+  color: var(--color-navy);
+  font-weight: 600;
+}
+.btn-auth {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--color-navy);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s ease;
+  margin-top: 8px;
+}
+.btn-auth:hover {
+  background: var(--color-navy-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(0,19,103,.25);
+}
+.auth-footer {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+.auth-footer a {
+  color: var(--color-navy);
+  font-weight: 700;
+  text-decoration: none;
+}
+.auth-footer a:hover { text-decoration: underline; }
+.auth-alert {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.auth-alert.error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  border: 1px solid rgba(220,38,38,.15);
+}
+.auth-alert.success {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid rgba(22,163,74,.15);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card" data-aos="fade-up">
+    <h1 class="auth-heading">{{ t('welcome_back') }}</h1>
+    <p class="auth-subheading">{{ t('login_subtitle') }}</p>
+
+    {% if error %}
+    <div class="auth-alert error">
+      <i class="bi bi-exclamation-circle-fill"></i>
+      <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    <form action="{{ url_for('auth.login', next=request.args.get('next', url_for('main.index'))) }}" method="post" autocomplete="off">
+  
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+  <div class="floating-group">
+    <input type="email" name="email" id="loginEmail" class="floating-input" placeholder=" " required autofocus>
+    <label for="loginEmail" class="floating-label">{{ t('email') }}</label>
+  </div>
+  
+  <div class="floating-group">
+    <input type="password" name="password" id="loginPassword" class="floating-input" placeholder=" " required>
+    <label for="loginPassword" class="floating-label">{{ t('password') }}</label>
+  </div>
+  
+  <button type="submit" class="btn-auth">
+    <i class="bi bi-box-arrow-in-right me-2"></i>{{ t('login_button') }}
+  </button>
+</form>
+
+    <div class="auth-footer">
+      {{ t('no_account') }} <a href="{{ url_for('auth.register') }}">{{ t('create_account') }}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

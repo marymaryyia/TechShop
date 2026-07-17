@@ -1,0 +1,40 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if subcategory else 'New' }} Subcategory{% endblock %}
+{% block page_title %}{{ 'Edit' if subcategory else 'New' }} Subcategory{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="stat-card">
+      <form method="post" class="form-admin">
+        <div class="mb-3">
+          <label>Category</label>
+          <select name="category_id" class="form-select" required>
+            <option value="">Select Category</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if subcategory and subcategory.category_id == cat.id %}selected{% endif %}>{{ cat.name_en }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label>Name (KA)</label>
+          <input type="text" name="name_ka" value="{{ subcategory.name_ka if subcategory else '' }}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label>Name (EN)</label>
+          <input type="text" name="name_en" value="{{ subcategory.name_en if subcategory else '' }}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label>Slug</label>
+          <input type="text" name="slug" value="{{ subcategory.slug if subcategory else '' }}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label>Sort Order</label>
+          <input type="number" name="sort_order" value="{{ subcategory.sort_order if subcategory else 0 }}" class="form-control">
+        </div>
+        <button type="submit" class="btn-admin">Save Subcategory</button>
+        <a href="{{ url_for('admin.admin_subcategories') }}" class="btn-admin-outline ms-2">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

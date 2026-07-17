@@ -1,0 +1,67 @@
+{% macro product_card(p) %}
+<div class="product-card">
+  <div class="product-img-wrap">
+    {% if p.badge == 'new' %}<span class="badge-tag badge-new">{{ t('badge_new') }}</span>{% endif %}
+    {% if p.badge == 'hot' %}<span class="badge-tag badge-hot">{{ t('badge_hot') }}</span>{% endif %}
+    {% if p.badge == 'sale' and p.old_price %}<span class="badge-tag badge-sale">−{{ (100 - (p.price / p.old_price * 100)) | round | int }}%</span>{% endif %}
+  <a href="{{ url_for('main.product_detail', product_id=p.id) }}">
+    {% if p.image %}
+        <img src="{% if p.image.startswith('http') or p.image.startswith('//') %}{{ p.image }}{% else %}{{ url_for('static', filename=p.image) }}{% endif %}" alt="{{ p.name[lang] }}" loading="lazy">
+    {% else %}
+        <div class="text-muted p-3 border border-dashed rounded bg-light text-center" style="height: 200px; display: flex; align-items: center; justify-content: center;">ფოტო არ არის</div>
+    {% endif %}
+</a>
+    
+    <div class="product-actions">
+      <form action="{{ url_for('wishlist.wishlist_toggle', product_id=p.id) }}" method="post" class="d-inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="next" value="{{ request.full_path }}">
+        <button type="submit" class="action-btn {% if p.id in session.get('wishlist', []) %}active{% endif %}" title="{{ t('add_to_wishlist') }}">
+          <i class="bi {% if p.id in session.get('wishlist', []) %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+        </button>
+      </form>
+      <a href="{{ url_for('main.product_detail', product_id=p.id) }}" class="action-btn" title="{{ t('view_all') }}">
+        <i class="bi bi-eye"></i>
+      </a>
+      <form action="{{ url_for('compare.compare_toggle', product_id=p.id) }}" method="post" class="d-inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="next" value="{{ request.full_path }}">
+        <button type="submit" class="action-btn {% if p.id in session.get('compare', []) %}active{% endif %}" title="{{ t('add_to_compare') }}">
+          <i class="bi bi-arrow-left-right"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+  <div class="product-body">
+    <p class="product-brand">{{ p.brand.name }}</p>
+    <h3 class="product-name">
+      <a href="{{ url_for('main.product_detail', product_id=p.id) }}">{{ p.name[lang] }}</a>
+    </h3>
+    
+    {% if p.reviews_count and p.reviews_count|int > 0 %}
+      <div class="product-rating">
+        <span class="rating-count">({{ p.reviews_count }})</span>
+      </div>
+    {% endif %}
+    
+    <div class="product-price">
+      <span class="price-current">{{ '{:,}'.format(p.price) }}</span>
+      <span class="price-currency">₾</span>
+      {% if p.old_price %}<span class="price-old">{{ '{:,}'.format(p.old_price) }} ₾</span>{% endif %}
+    </div>
+    
+    {% if p.stock_qty > 0 %}
+    <form action="{{ url_for('cart.cart_add', product_id=p.id) }}" method="post">]
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="next" value="{{ request.full_path }}">
+      <button type="submit" class="btn-add-cart">
+        <i class="bi bi-cart-plus"></i> {{ t('add_to_cart') }}
+      </button>
+    </form>
+    {% else %}
+    <button type="button" class="btn-add-cart" disabled>{{ t('out_of_stock') }}</button>
+    {% endif %}
+    
+  </div>
+</div>
+{% endmacro %}

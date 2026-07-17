@@ -1,0 +1,71 @@
+{% extends "admin/base.html" %}
+{% block title %}Orders{% endblock %}
+{% block page_title %}Orders{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin.admin_orders') }}" class="filter-btn {% if not request.args.get('status') %}active{% endif %}">All</a>
+    {% for s in ['pending','processing','shipped','completed','cancelled','refunded'] %}
+    <a href="{{ url_for('admin.admin_orders', status=s) }}" class="filter-btn {% if request.args.get('status') == s %}active{% endif %}">{{ s|title }}</a>
+    {% endfor %}
+  </div>
+  <form class="search-admin d-flex gap-2" method="get">
+    <input type="text" name="q" value="{{ request.args.get('q','') }}" class="form-control" placeholder="Search customers..." style="border-radius: 8px;">
+    <button type="submit" class="btn-admin"><i class="bi bi-search"></i></button>
+  </form>
+</div>
+<div class="admin-table">
+  <table class="table mb-0">
+    <thead>
+      <tr><th>Order #</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      <tr>
+        <td><a href="{{ url_for('admin.admin_order_detail', order_id=order.id) }}" style="font-weight: 700;">#{{ order.id }}</a></td>
+        <td>
+          <div style="font-weight: 600;">{{ order.customer_name }}</div>
+          <div style="font-size: 12px; color: var(--color-text-muted);">{{ order.customer_email }}</div>
+        </td>
+        <td>{{ order.item_count }}</td>
+        <td style="font-weight: 700;">{{ "%.2f"|format(order.total) }}</td>
+        <td>
+          <span class="badge-admin" style="background: {% if order.status == 'completed' %}var(--color-success-bg); color: var(--color-success-text);{% elif order.status == 'pending' %}#fef3c7; color: #92400e;{% elif order.status == 'cancelled' %}var(--color-danger-bg); color: var(--color-danger-text);{% else %}#e0e7ff; color: #3730a3;{% endif %}">{{ order.status }}</span>
+        </td>
+        <td style="font-size: 12px; color: var(--color-text-muted);">{{ order.created_at.strftime('%Y-%m-%d %H:%M') if order.created_at else '-' }}</td>
+        <td><a href="{{ url_for('admin.admin_order_detail', order_id=order.id) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px;">View</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="text-center text-muted py-5">No orders found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if pagination.pages > 1 %}
+<nav class="mt-4">
+  <ul class="pagination pagination-admin justify-content-center">
+    {% if pagination.has_prev %}
+    <li class="page-item"><a class="page-link" href="{{ url_for('admin.admin_orders', page=pagination.prev_num, **request.args) }}"><i class="bi bi-chevron-left"></i></a></li>
+    {% else %}
+    <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left"></i></span></li>
+    {% endif %}
+    {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+      {% if p %}
+        {% if p == pagination.page %}
+        <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+        {% else %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('admin.admin_orders', page=p, **request.args) }}">{{ p }}</a></li>
+        {% endif %}
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+      {% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}
+    <li class="page-item"><a class="page-link" href="{{ url_for('admin.admin_orders', page=pagination.next_num, **request.args) }}"><i class="bi bi-chevron-right"></i></a></li>
+    {% else %}
+    <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right"></i></span></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

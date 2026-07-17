@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% from "_macros.html" import product_card with context %}
+{% block title %}{{ t('products_page_title') }} - {{ t('site_name') }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .sidebar-card {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  }
+  .sidebar-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0b1a30;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  border-bottom: 2px solid #e9ecef !important; 
+  padding-bottom: 8px;
+}
+
+.sidebar-title::after {
+  background-color: #e9ecef !important;
+}
+  .form-check-input:checked {
+    background-color: #0b1a30;
+    border-color: #0b1a30;
+  }
+  .form-check-label {
+    font-size: 0.9rem;
+    color: #495057;
+    cursor: pointer;
+  }
+  .price-filter-box .form-control {
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+  .price-filter-box .form-control:focus {
+    border-color: #0b1a30;
+    box-shadow: 0 0 0 0.25rem rgba(11, 26, 48, 0.1);
+  }
+  .btn-filter-apply {
+    background-color: #0b1a30;
+    color: white;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+  }
+  .btn-filter-apply:hover {
+    background-color: #162a4a;
+    color: white;
+  }
+  .filter-list li a {
+    display: block;
+    padding: 8px 12px;
+    color: #495057;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .filter-list li a:hover, .filter-list li a.active {
+    background-color: rgba(11, 26, 48, 0.05);
+    color: #0b1a30;
+    font-weight: 600;
+  }
+   
+  
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-wrap">
+  <div class="container-xl">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">{{ t('home') }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ t('breadcrumb_products') }}</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<section class="section-pad">
+  <div class="container-xl">
+    
+    <form method="GET" action="{{ url_for('products.products') }}" id="filterForm">
+      <input type="hidden" name="category" value="{{ selected_category }}">
+      <input type="hidden" name="sort" value="{{ selected_sort }}">
+
+      <div class="section-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="section-title mb-1">{{ t('products_page_title') }}</h2>
+          <span class="results-count text-muted">{{ total }} {{ t('results_found') }}</span>
+        </div>
+        {% if selected_category or selected_brands or min_price or max_price or active_spec_filters %}
+          <a href="{{ url_for('products.products') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="bi bi-x-circle me-1"></i>{{ t('clear_all') }}
+          </a>
+        {% endif %}
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-3">
+          
+          <div class="sidebar-card price-filter-box">
+            <h3 class="sidebar-title">{{ t('price_gel') }}</h3>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <input type="number" name="min_price" class="form-control" placeholder="{{ t('from') }}" value="{{ min_price if min_price is not none else '' }}" min="0">
+              <span class="text-muted">—</span>
+              <input type="number" name="max_price" class="form-control" placeholder="{{ t('to') }}" value="{{ max_price if max_price is not none else '' }}" min="0">
+            </div>
+            <button type="submit" class="btn btn-filter-apply w-100 py-2 btn-sm mt-1">{{ t('filter_by_price') }}</button>
+          </div>
+
+          {% if not selected_category %}
+         <div class="sidebar-card">
+  <h3 class="sidebar-title">{{ t('category') }}</h3>
+  <ul class="filter-list list-unstyled mb-0">
+    <li>
+      <a href="#" onclick="changeCategory(''); return false;" class="{% if not selected_category %}active{% endif %}">
+        {{ t('all') }}
+      </a>
+    </li>
+    {% for cat in sidebar_categories %}
+    <li>
+      <a href="#" onclick="changeCategory('{{ cat.slug }}'); return false;" class="{% if selected_category == cat.slug %}active{% endif %}">
+        <i class="bi {{ cat.icon_class }} me-2"></i>
+        {{ cat.name_ka if session.get('lang', 'ka') == 'ka' else cat.name_en }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+          {% endif %}
+
+          <div class="sidebar-card">
+            <h3 class="sidebar-title">{{ t('brand') }}</h3>
+            <div style="max-height: 180px; overflow-y: auto; padding-right: 5px;">
+              {% for b in brands %}
+              <div class="form-check mb-2">
+                <input class="form-check-input filter-checkbox" type="checkbox" name="brands" value="{{ b.slug }}" id="brand_{{ b.slug }}"
+                       {% if b.slug in selected_brands %}checked{% endif %} onchange="this.form.submit()">
+                <label class="form-check-label" for="brand_{{ b.slug }}">{{ b.name }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          {% if available_spec_filters %}
+            {% for spec in available_spec_filters %}
+            <div class="sidebar-card animate__animated animate__fadeIn">
+              <h3 class="sidebar-title">{{ t(spec.label) }}</h3>
+              {% for option in spec.options %}
+              <div class="form-check mb-2">
+                <input class="form-check-input filter-checkbox" type="checkbox" name="{{ spec.key }}" value="{{ option }}" id="spec_{{ spec.key }}_{{ loop.index }}"
+                       {% if active_spec_filters[spec.key] and option in active_spec_filters[spec.key] %}checked{% endif %} onchange="this.form.submit()">
+                <label class="form-check-label" for="spec_{{ spec.key }}_{{ loop.index }}">
+                  {{ t(option) if option.startswith('filter_') else option }}
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+
+        <div class="col-lg-9">
+          <div class="filter-bar d-flex align-items-center justify-content-start flex-wrap gap-2 mb-3">
+            <span class="filter-label text-muted me-2">{{ t('sort_by') }}:</span>
+            <button type="button" onclick="changeSort('')" class="filter-btn {% if not selected_sort %}active{% endif %}">{{ t('sort_default') }}</button>
+            <button type="button" onclick="changeSort('price_asc')" class="filter-btn {% if selected_sort == 'price_asc' %}active{% endif %}">{{ t('sort_price_asc') }}</button>
+            <button type="button" onclick="changeSort('price_desc')" class="filter-btn {% if selected_sort == 'price_desc' %}active{% endif %}">{{ t('sort_price_desc') }}</button>
+            <button type="button" onclick="changeSort('rating')" class="filter-btn {% if selected_sort == 'rating' %}active{% endif %}">{{ t('sort_rating') }}</button>
+            <button type="button" onclick="changeSort('new')" class="filter-btn {% if selected_sort == 'new' %}active{% endif %}">{{ t('sort_new') }}</button>
+          </div>
+
+          {% if products %}
+          <div class="row g-3">
+            {% for p in products %}
+            <div class="col-6 col-md-4 col-lg-4">
+              {{ product_card(p) }}
+            </div>
+            {% endfor %}
+          </div>
+
+          {% if total_pages > 1 %}
+          <nav aria-label="pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+              <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+                <button type="button" class="page-link" onclick="changePage({{ page - 1 }})">«</button>
+              </li>
+              {% for p_num in range(1, total_pages + 1) %}
+              <li class="page-item {% if p_num == page %}active{% endif %}">
+                <button type="button" class="page-link" onclick="changePage({{ p_num }})">{{ p_num }}</button>
+              </li>
+              {% endfor %}
+              <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+                <button type="button" class="page-link" onclick="changePage({{ page + 1 }})">»</button>
+              </li>
+            </ul>
+          </nav>
+          {% endif %}
+
+          {% else %}
+          <div class="empty-state text-center py-5">
+            <i class="bi bi-search display-4 text-muted mb-3 d-block"></i>
+            <h3>{{ t('no_results') }}</h3>
+            <p class="text-muted">{{ t('no_results_hint') }}</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<script>
+  function changeSort(sortVal) {
+      document.querySelector('input[name="sort"]').value = sortVal;
+      document.getElementById('filterForm').submit();
+  }
+  
+  function changePage(pageVal) {
+      let form = document.getElementById('filterForm');
+      let pageInput = document.createElement('input');
+      pageInput.type = 'hidden';
+      pageInput.name = 'page';
+      pageInput.value = pageVal;
+      form.appendChild(pageInput);
+      form.submit();
+  }
+
+  function changeCategory(catSlug) {
+      document.querySelector('input[name="category"]').value = catSlug;
+      document.querySelector('input[name="sort"]').value = ''; 
+      document.getElementById('filterForm').submit();
+  }
+</script>
+{% endblock %}

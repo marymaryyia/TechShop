@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+{% block title %}Categories{% endblock %}
+{% block page_title %}Categories{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <a href="{{ url_for('admin.admin_category_create') }}" class="btn-admin"><i class="bi bi-plus-lg me-1"></i> Add Category</a>
+</div>
+<div class="admin-table">
+  <table class="table mb-0">
+    <thead>
+      <tr><th>Name</th><th>Slug</th><th>Icon</th><th>Products</th><th>Sort</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for cat in categories %}
+      <tr>
+        <td>
+          <div style="font-weight: 600;">{{ cat.name_en }}</div>
+          <div style="font-size: 12px; color: var(--color-text-muted);">{{ cat.name_ka }}</div>
+        </td>
+        <td><code style="font-size: 12px;">{{ cat.slug }}</code></td>
+        <td><i class="bi {{ cat.icon }}"></i></td>
+        <td>{{ cat.product_count }}</td>
+        <td>{{ cat.sort_order }}</td>
+        <td>
+          <a href="{{ url_for('admin.admin_category_edit', category_id=cat.id) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px;"><i class="bi bi-pencil"></i></a>
+          <form action="{{ url_for('admin.admin_category_delete', category_id=cat.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this category? Products will become uncategorized.');">
+            <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius: 6px;"><i class="bi bi-trash"></i></button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="text-center text-muted py-5">No categories found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
