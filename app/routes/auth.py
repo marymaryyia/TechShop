@@ -1,5 +1,6 @@
 import os 
 import random
+import requests
 from flask import (
     Blueprint, render_template, request, redirect, url_for, flash, session
 )
@@ -62,7 +63,6 @@ def logout():
     
     return response
 
-
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if current_user.is_authenticated:
@@ -88,6 +88,17 @@ def register():
             else:
                 existing_user = User.query.filter_by(email=email).first()
                 
+                # --- Brevo API კონფიგურაცია ---
+                api_key = os.environ.get('BREVO_API_KEY')
+                brevo_url = "https://api.brevo.com/v3/smtp/email"
+                headers = {
+                    "accept": "application/json",
+                    "api-key": api_key,
+                    "content-type": "application/json"
+                }
+                sender_info = {"name": "TechShop", "email": "maria.kashavanidzete07@geolab.edu.ge"}
+                # ------------------------------
+
                 if existing_user:
                     if existing_user.is_active:
                         error = t("validation.email_exists")
@@ -101,17 +112,26 @@ def register():
                         db.session.commit()
                         
                         try:
-                            msg = Message("ვერიფიკაციის კოდი - TechShop", sender="maria.kashavanidzete07@geolab.edu.ge", recipients=[existing_user.email])
-                            msg.body = f"გამარჯობა! თქვენი ვერიფიკაციის კოდია: {verification_code}"
-                            mail.send(msg)
+                            # მეილის გაგზავნა Brevo-თი (უკვე არსებული, მაგრამ არააქტიური იუზერისთვის)
+                            payload = {
+                                "sender": sender_info,
+                                "to": [{"email": existing_user.email, "name": existing_user.first_name}],
+                                "subject": "ვერიფიკაციის კოდი - TechShop",
+                                "htmlContent": f"<html><body><h3>გამარჯობა, {existing_user.first_name}!</h3><p>თქვენი ვერიფიკაციის კოდია: <strong style='font-size: 20px;'>{verification_code}</strong></p></body></html>"
+                            }
+                            resp = requests.post(brevo_url, json=payload, headers=headers)
+                            if resp.status_code not in [200, 201, 202]:
+                                raise Exception(f"Brevo Error: {resp.text}")
+                                
                         except Exception as e:
                             print(f"\n[MAIL ERROR] ---> {e}\n")
-                            error = "მეილის გაგზავნა ვერ მოხერხდა. შეამოწმეთ SMTP კონფიგურაცია და ტერმინალი!"
+                            error = "მეილის გაგზავნა ვერ მოხერხდა. შეამოწმეთ Brevo კონფიგურაცია და ტერმინალი!"
                             return render_template("register.html", error=error, show_verify_step=False)
                         
                         show_verify_step = True
                         return render_template("register.html", show_verify_step=show_verify_step, email=email)
 
+                # --- ახალი მომხმარებლის რეგისტრაცია ---
                 verification_code = str(random.randint(100000, 999999))
                 new_user = User(
                     first_name=first_name,
@@ -126,12 +146,20 @@ def register():
                 db.session.commit()
                 
                 try:
-                    msg = Message("ვერიფიკაციის კოდი - TechShop", sender="maria.kashavanidzete07@geolab.edu.ge", recipients=[new_user.email])
-                    msg.body = f"გამარჯობა! თქვენი ვერიფიკაციის კოდია: {verification_code}"
-                    mail.send(msg)
+                    # მეილის გაგზავნა Brevo-თი (ახალი იუზერისთვის)
+                    payload = {
+                        "sender": sender_info,
+                        "to": [{"email": new_user.email, "name": new_user.first_name}],
+                        "subject": "ვერიფიკაციის კოდი - TechShop",
+                        "htmlContent": f"<html><body><h3>გამარჯობა, {new_user.first_name}!</h3><p>თქვენი ვერიფიკაციის კოდია: <strong style='font-size: 20px;'>{verification_code}</strong></p></body></html>"
+                    }
+                    resp = requests.post(brevo_url, json=payload, headers=headers)
+                    if resp.status_code not in [200, 201, 202]:
+                        raise Exception(f"Brevo Error: {resp.text}")
+                        
                 except Exception as e:
                     print(f"\n[MAIL ERROR] ---> {e}\n")
-                    error = "მეილის გაგზავნა ვერ მოხერხდა. შეამოწმეთ SMTP კონფიგურაცია!"
+                    error = "მეილის გაგზავნა ვერ მოხერხდა. შეამოწმეთ Brevo კონფიგურაცია!"
                     db.session.delete(new_user)  
                     db.session.commit()
                     return render_template("register.html", error=error, show_verify_step=False)
