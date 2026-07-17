@@ -1,13 +1,23 @@
 import os
 
 db_url = os.environ.get('DATABASE_URL', 'sqlite:///techshop.db')
+
 if db_url and db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
+    
+    if "?" not in db_url:
+        db_url += "?sslmode=require"
+    elif "sslmode" not in db_url:
+        db_url += "&sslmode=require"
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 280,
+    }
 
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
