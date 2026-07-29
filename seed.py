@@ -1,7 +1,18 @@
 import re
 import os
 from extensions import db
-from app.models import User, Category, Subcategory, MegaGroup, MegaItem, Brand, Product
+from app.models import (
+    User,
+    Category,
+    Subcategory,
+    MegaGroup,
+    MegaItem,
+    Brand,
+    Product,
+    Order,
+    OrderItem,
+    Review,
+)
 from app.utils.products_data import PRODUCTS
 
 SUPER_ADMIN_EMAIL = os.environ.get("SUPER_ADMIN_EMAIL", "admin@test.com")
@@ -967,13 +978,22 @@ def _ensure_mega_item(group_id, name_ka, name_en, url, sort_order=0):
     return mi
 
 
+from sqlalchemy import text
+
 def run():
-    Product.query.delete()
-    MegaItem.query.delete()
-    Subcategory.query.delete()
-    MegaGroup.query.delete()
-    Brand.query.delete()
-    Category.query.delete()
+    db.session.execute(text("""
+        TRUNCATE TABLE
+            reviews,
+            order_items,
+            orders,
+            products,
+            mega_items,
+            mega_groups,
+            subcategories,
+            brands,
+            categories
+        RESTART IDENTITY CASCADE;
+    """))
     db.session.commit()
 
     cat_map = {}
