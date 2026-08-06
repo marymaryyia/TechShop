@@ -977,7 +977,6 @@ def _ensure_mega_item(group_id, name_ka, name_en, url, sort_order=0):
         mi.sort_order = sort_order
     return mi
 
-
 from sqlalchemy import text
 
 def run():

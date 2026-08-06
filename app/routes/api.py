@@ -1,4 +1,3 @@
-
 from flask import Blueprint, jsonify, request
 from app.models import Product, Category
 from app.utils.cart import cart_count

@@ -1,4 +1,3 @@
-
 from flask import request, url_for
 
 def safe_next(default_endpoint="main.index"):
