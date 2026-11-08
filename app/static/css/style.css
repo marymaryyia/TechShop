@@ -75,7 +75,6 @@ html[data-theme="dark"] {
     display: inline-block;
 }
 
-/* როცა html ტეგს ედება data-theme="dark", ვმალავთ ღია ლოგოს და ვაჩენთ მუქს */
 [data-theme="dark"] .logo-light {
     display: none;
 }

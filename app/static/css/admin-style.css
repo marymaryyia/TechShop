@@ -257,7 +257,6 @@ body.sidebar-collapsed .admin-topbar { left: var(--sidebar-collapsed); }
 
 .admin-dropdown-item:hover { background: var(--bg-body); }
 
-/* Main Content */
 .admin-main {
   padding: calc(var(--topbar-height) + 24px) 24px 24px;
   min-height: 100vh;
@@ -351,7 +350,6 @@ body.sidebar-collapsed .admin-topbar { left: var(--sidebar-collapsed); }
 .action-btn:hover { background: var(--bg-body); color: var(--primary-blue); }
 .action-btn.delete:hover { background: #FEF2F2; color: var(--danger); }
 
-/* Status badges */
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -390,7 +388,6 @@ body.sidebar-collapsed .admin-topbar { left: var(--sidebar-collapsed); }
 .status-select.status-cancelled,
 .status-select.status-rejected { background: #FEF2F2; color: var(--danger); }
 
-/* Filters */
 .filter-bar {
   display: flex;
   align-items: center;
@@ -425,7 +422,6 @@ body.sidebar-collapsed .admin-topbar { left: var(--sidebar-collapsed); }
 .form-textarea { width: 100%; min-height: 100px; resize: vertical; }
 .form-select { cursor: pointer; }
 
-/* Buttons */
 .btn-admin {
   display: inline-flex;
   align-items: center;
@@ -588,7 +584,6 @@ body.admin-body {
   color: var(--text-primary);
   min-height: 100vh;
   padding-left: var(--sidebar-width);
-  /* ამოღებულია transition: padding-left 0.3s ease; */
 }
 
 /* Sidebar-ის მთავარი სტილი */
