@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, session
 from app.models import Product, Category, Brand, Subcategory
 from extensions import db
 from app.utils.filters_config import CATEGORY_FILTERS
+from sqlalchemy import cast, Text  
 
 products_bp = Blueprint('products', __name__)
 
@@ -39,15 +40,16 @@ def products():
             query = query.join(Product.subcategory).filter(Subcategory.slug == selected_subcategory)
 
     if selected_type:
+        specs_text = cast(Product.specs, Text)
         if selected_type == 'laptop-mouse':
             query = query.filter(
                 db.or_(
-                    Product.specs.ilike('%"type": "laptop-mouse"%'),
-                    Product.specs.ilike('%"type": "gaming-mouse"%')
+                    specs_text.ilike('%"type": "laptop-mouse"%'),
+                    specs_text.ilike('%"type": "gaming-mouse"%')
                 )
             )
         else:
-            query = query.filter(Product.specs.ilike(f'%"type": "{selected_type}"%'))
+            query = query.filter(specs_text.ilike(f'%"type": "{selected_type}"%'))
 
     if selected_brands:
         selected_brands_lower = [b.lower().strip() for b in selected_brands]
@@ -62,6 +64,7 @@ def products():
     available_spec_filters = CATEGORY_FILTERS.get(selected_category, [])
 
     if selected_category and available_spec_filters:
+        specs_text = cast(Product.specs, Text)  
         for spec in available_spec_filters:
             selected_vals = request.args.getlist(spec['key'])
             if selected_vals:
@@ -69,7 +72,7 @@ def products():
                 conditions = []
                 for val in selected_vals:
                     search_term = f'"{spec["key"]}": "{val}"'
-                    conditions.append(Product.specs.ilike(f'%{search_term}%'))
+                    conditions.append(specs_text.ilike(f'%{search_term}%'))
                 
                 query = query.filter(db.or_(*conditions))
 
